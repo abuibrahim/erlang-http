@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Erlang-HTTP-Server Examples</title>
+  </head>
+  <body>
+    <form action="/script/http_esi_example/print1" method="get">
+      <fieldset>
+	<legend>Test GET (results will be gzipped)</legend>
+	<label for="arg1">Arg1</label>
+	<input id="arg1" name="arg1" type="text" />
+	<br />
+	<label for="arg2">Arg2</label>
+	<input id="arg2" name="arg2" type="text" />
+	<br />
+	<label for="arg3">Arg3</label>
+	<input id="arg3" name="arg3" type="text" />
+	<br />
+	<input type="reset" />
+	<input type="submit" />
+      </fieldset>
+    </form>
+    <form action="/script/http_esi_example/print2" method="post">
+      <fieldset>
+	<legend>Test POST</legend>
+	<label for="arg1">Arg1</label>
+	<input id="arg1" name="arg1" type="text" />
+	<br />
+	<label for="arg2">Arg2</label>
+	<input id="arg2" name="arg2" type="text" />
+	<br />
+	<label for="arg3">Arg3</label>
+	<input id="arg3" name="arg3" type="text" />
+	<br />
+	<input type="reset" />
+	<input type="submit" />
+      </fieldset>
+    </form>
+    <form action="/script/http_esi_example/chunked" method="get">
+      <fieldset>
+	<legend>Test streaming</legend>
+	<label for="chunks">Number of chunks</label>
+	<input id="chunks" name="chunks" type="text" value="10" />
+	<label for="timeout">Timeout</label>
+	<input id="timeout" name="timeout" type="text" value="1000" />
+	<br />
+	<input type="reset" />
+	<input type="submit" />
+      </fieldset>
+    </form>
+    <form action="/script/http_esi_example/location" method="get">
+      <fieldset>
+	<legend>Test automatic redirection</legend>
+	<label for="url">URL</label>
+	<input id="url" name="url" type="text" value="http://www.yahoo.com" />
+	<br />
+	<input type="reset" />
+	<input type="submit" />
+      </fieldset>
+    </form>
+  </body>
+</html>

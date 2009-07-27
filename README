@@ -1,0 +1,7 @@
+This is an Erlang/OTP application that includes HTTP/1.1 client and server.
+
+It is similar to inets and supports pluggable modules, but exposes a slightly
+different API.
+
+One of the modules is http_mod_amf which implements Flex remoting services.
+The build depends on erlang-amf.
