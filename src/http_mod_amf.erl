@@ -115,8 +115,8 @@ handle_amf_message_body([#amf_object{class = ?COMMAND_MESSAGE} = Msg]) ->
     end;
 handle_amf_message_body([#amf_object{class = ?REMOTING_MESSAGE} = Msg]) ->
     Members = Msg#amf_object.members,
-    Operation = binary_to_atom(proplists:get_value(operation, Members)),
-    Source = binary_to_atom(proplists:get_value(source, Members)),
+    Operation = binary_to_atom(proplists:get_value(operation, Members), utf8),
+    Source = binary_to_atom(proplists:get_value(source, Members), utf8),
     Body = proplists:get_value(body, Members),
     {ok, FlexServices} = application:get_env(flex_services),
     case lists:member(Source, FlexServices) of
@@ -131,9 +131,6 @@ handle_amf_message_body([#amf_object{class = ?REMOTING_MESSAGE} = Msg]) ->
 	false ->
 	    throw(resource_unavailable)
     end.
-
-binary_to_atom(Bin) when is_binary(Bin) ->
-    list_to_atom(binary_to_list(Bin)).
 
 error_msg(invalid_credentials) ->
     error_msg(<<"Client.Authentication">>, <<"Invalid Credentials">>);
