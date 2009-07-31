@@ -58,16 +58,16 @@ handle_amf_messages([Message | Rest], Acc) ->
 
 handle_amf_message(#amf_message{response = Response, body = Body}) ->
     try handle_amf_message_body(Body) of
-	Body1 ->
+	ResponseBody ->
 	    #amf_message{target = list_to_binary([Response, "/onResult"]),
 			 response = <<>>,
-			 body = Body1}
+			 body = ResponseBody}
     catch
 	Error ->
-	    error_logger:warning_report({?MODULE, Error}),
+	    error_logger:error_report({?MODULE, Error}),
 	    #amf_message{target = list_to_binary([Response, "/onStatus"]),
 			 response = <<>>,
-			 body = error_message(Error)}
+			 body = error_msg(Error)}
     end.
 
 -define(SUBSCRIBE,                0).
@@ -89,80 +89,93 @@ handle_amf_message(#amf_message{response = Response, body = Body}) ->
 -define(REMOTING_MESSAGE,    <<"flex.messaging.messages.RemotingMessage">>).
 -define(ERROR_MESSAGE,       <<"flex.messaging.messages.ErrorMessage">>).
 
-handle_amf_message_body([Object])
-  when Object#amf_object.class == ?COMMAND_MESSAGE ->
-    case proplists:get_value(operation, Object#amf_object.members) of
+handle_amf_message_body([#amf_object{class = ?COMMAND_MESSAGE} = Msg]) ->
+    case proplists:get_value(operation, Msg#amf_object.members) of
 	?CLIENT_PING ->
-	    acknowledge_message(null, Object);
+	    acknowledge_msg(Msg, null);
 	?DISCONNECT ->
-	    acknowledge_message(null, Object);
+	    acknowledge_msg(Msg, null);
 	?LOGIN ->
-	    Body = proplists:get_value(body, Object#amf_object.members),
+	    Body = proplists:get_value(body, Msg#amf_object.members),
 	    Decoded =  base64:decode_to_string(Body),
 	    [Username, Password] = re:split(Decoded, ":", [{parts, 2}]),
 	    {ok, FlexAuth} = application:get_env(flex_auth),
 	    case FlexAuth(Username, Password) of
 		true ->
-		    acknowledge_message(Username, Object);
+		    acknowledge_msg(Msg, Username);
 		false ->
-		    % @todo What to do we send when credentials are invalid?
-		    acknowledge_message(Username, Object)
+		    throw(invalid_credentials)
 	    end;
 	?LOGOUT ->
-	    acknowledge_message(true, Object);
+	    acknowledge_msg(Msg, true);
 	?TRIGGER_CONNECT ->
-	    acknowledge_message(null, Object);
-	Else ->
-	    throw({unsupported_operation, Else})
+	    acknowledge_msg(Msg, null);
+	_Other ->
+	    throw(unsupported_operation)
     end;
-handle_amf_message_body([Object])
-  when Object#amf_object.class == ?REMOTING_MESSAGE ->
-    Members = Object#amf_object.members,
+handle_amf_message_body([#amf_object{class = ?REMOTING_MESSAGE} = Msg]) ->
+    Members = Msg#amf_object.members,
     Operation = binary_to_atom(proplists:get_value(operation, Members)),
     Source = binary_to_atom(proplists:get_value(source, Members)),
     Body = proplists:get_value(body, Members),
     {ok, FlexServices} = application:get_env(flex_services),
     case lists:member(Source, FlexServices) of
 	true ->
-	    Result = apply(Source, Operation, Body),
-	    acknowledge_message(Result, Object);
+	    try apply(Source, Operation, Body) of
+		Result ->
+		    acknowledge_msg(Msg, Result)
+	    catch
+		_Class:_Term ->
+		    throw(service_failure)
+	    end;
 	false ->
-	    throw({unknown_service, Source})
+	    throw(resource_unavailable)
     end.
 
 binary_to_atom(Bin) when is_binary(Bin) ->
     list_to_atom(binary_to_list(Bin)).
 
-acknowledge_message(Body, #amf_object{members = Members}) ->
+error_msg(invalid_credentials) ->
+    error_msg(<<"Client.Authentication">>, <<"Invalid Credentials">>);
+error_msg(resource_unavailable) ->
+    error_msg(<<"Server.ResourceUnavailable">>, <<"Resource Unavailable">>);
+error_msg(unsupported_operation) ->
+    error_msg(<<"Server.Processing">>, <<"Unsupported Operation">>);
+error_msg(service_failure) ->
+    error_msg(<<"Server.Processing">>, <<"Service Failure">>);
+error_msg(_) ->
+    error_msg(<<"Server.Processing">>, <<"Unknown Error">>).
+
+error_msg(FaultCode, FaultString) ->
+    #amf_object{class = ?ERROR_MESSAGE,
+		members = [{faultCode, FaultCode},
+			   {faultDetail, <<"Runtime Error">>},
+			   {faultString, FaultString}]}.
+
+acknowledge_msg(#amf_object{members = Members}, Body) ->
     MessageId = proplists:get_value(messageId, Members),
-    ClientId = case proplists:get_value(clientId, Members, null) of
-		   null ->
-		       random_id();
-		   Else ->
-		       Else
-	       end,
-    {MegaSecs, Secs, MicroSecs} = now(),
-    Timestamp = float((MegaSecs * 1000000 + Secs) * 1000 + MicroSecs div 1000),
+    ClientId =
+	case proplists:get_value(clientId, Members, null) of
+	    null ->
+		random_uuid();
+	    Else ->
+		Else
+	end,
+    Destination = proplists:get_value(destination, Members, null),
     #amf_object{class = ?ACKNOWLEDGE_MESSAGE,
-		members = [{messageId, random_id()},
+		members = [{messageId, random_uuid()},
 			   {clientId, ClientId},
 			   {correlationId, MessageId},
-			   {destination, null},
+			   {destination, Destination},
 			   {body, Body},
 			   {timeToLive, 0},
-			   {timestamp, Timestamp},
+			   {timestamp, now_to_milli_seconds(now())},
 			   {headers, []}]}.
 
-error_message(Reason) ->
-    #amf_object{class = ?ERROR_MESSAGE,
-		members = [{faultCode, format("~p", [Reason])},
-			   {faultDetail, <<"Runtime Error">>},
-			   {faultString, format("~p", [Reason])}]}.
-
-format(Fmt, Args) ->
-    list_to_binary(io_lib:format(Fmt, Args)).
-
-random_id() ->
+random_uuid() ->
     <<X1:32, X2:16, X3:16, X4:16, X5:48>> = crypto:rand_bytes(16),
     IntToHex = fun(X) -> erlang:integer_to_list(X, 16) end,
     list_to_binary(string:join(lists:map(IntToHex, [X1,X2,X3,X4,X5]), "-")).
+
+now_to_milli_seconds({MegaSecs, Secs, MicroSecs}) ->
+    (MegaSecs * 1000000 + Secs) * 1000 + MicroSecs / 1000.
