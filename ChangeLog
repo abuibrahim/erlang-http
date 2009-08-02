@@ -1,0 +1,5 @@
+2009-08-02  Ruslan Babayev  <ruslan@babayev.com>
+
+	* src/http_mod_amf.erl: Use {object, Class, Members} instead of the
+	#amf_object{} record.
+

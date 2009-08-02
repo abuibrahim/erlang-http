@@ -89,14 +89,14 @@ handle_amf_message(#amf_message{response = Response, body = Body}) ->
 -define(REMOTING_MESSAGE,    <<"flex.messaging.messages.RemotingMessage">>).
 -define(ERROR_MESSAGE,       <<"flex.messaging.messages.ErrorMessage">>).
 
-handle_amf_message_body([#amf_object{class = ?COMMAND_MESSAGE} = Msg]) ->
-    case proplists:get_value(operation, Msg#amf_object.members) of
+handle_amf_message_body([{object, ?COMMAND_MESSAGE, Members} = Msg]) ->
+    case proplists:get_value(operation, Members) of
 	?CLIENT_PING ->
 	    acknowledge_msg(Msg, null);
 	?DISCONNECT ->
 	    acknowledge_msg(Msg, null);
 	?LOGIN ->
-	    Body = proplists:get_value(body, Msg#amf_object.members),
+	    Body = proplists:get_value(body, Members),
 	    Decoded =  base64:decode_to_string(Body),
 	    [Username, Password] = re:split(Decoded, ":", [{parts, 2}]),
 	    {ok, FlexAuth} = application:get_env(flex_auth),
@@ -113,8 +113,7 @@ handle_amf_message_body([#amf_object{class = ?COMMAND_MESSAGE} = Msg]) ->
 	_Other ->
 	    throw(unsupported_operation)
     end;
-handle_amf_message_body([#amf_object{class = ?REMOTING_MESSAGE} = Msg]) ->
-    Members = Msg#amf_object.members,
+handle_amf_message_body([{object, ?REMOTING_MESSAGE, Members} = Msg]) ->
     Operation = binary_to_atom(proplists:get_value(operation, Members), utf8),
     Source = binary_to_atom(proplists:get_value(source, Members), utf8),
     Body = proplists:get_value(body, Members),
@@ -144,12 +143,12 @@ error_msg(_) ->
     error_msg(<<"Server.Processing">>, <<"Unknown Error">>).
 
 error_msg(FaultCode, FaultString) ->
-    #amf_object{class = ?ERROR_MESSAGE,
-		members = [{faultCode, FaultCode},
-			   {faultDetail, <<"Runtime Error">>},
-			   {faultString, FaultString}]}.
+    {object, ?ERROR_MESSAGE,
+     [{faultCode, FaultCode},
+      {faultDetail, <<"Runtime Error">>},
+      {faultString, FaultString}]}.
 
-acknowledge_msg(#amf_object{members = Members}, Body) ->
+acknowledge_msg({object, _Class, Members}, Body) ->
     MessageId = proplists:get_value(messageId, Members),
     ClientId =
 	case proplists:get_value(clientId, Members, null) of
@@ -159,15 +158,15 @@ acknowledge_msg(#amf_object{members = Members}, Body) ->
 		Else
 	end,
     Destination = proplists:get_value(destination, Members, null),
-    #amf_object{class = ?ACKNOWLEDGE_MESSAGE,
-		members = [{messageId, random_uuid()},
-			   {clientId, ClientId},
-			   {correlationId, MessageId},
-			   {destination, Destination},
-			   {body, Body},
-			   {timeToLive, 0},
-			   {timestamp, now_to_milli_seconds(now())},
-			   {headers, []}]}.
+    {object, ?ACKNOWLEDGE_MESSAGE,
+     [{messageId, random_uuid()},
+      {clientId, ClientId},
+      {correlationId, MessageId},
+      {destination, Destination},
+      {body, Body},
+      {timeToLive, 0},
+      {timestamp, now_to_milli_seconds(now())},
+      {headers, []}]}.
 
 random_uuid() ->
     <<X1:32, X2:16, X3:16, X4:16, X5:48>> = crypto:rand_bytes(16),
