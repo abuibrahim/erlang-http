@@ -30,7 +30,7 @@ hrldir = $(ERLANG_INSTALL_LIB_DIR_http)/include
 beam_DATA = $(dist_erl_DATA:.erl=.beam) http.app
 beamdir = $(ERLANG_INSTALL_LIB_DIR_http)/ebin
 boot_DATA = http.boot http.script
-bootdir = $(ERLANG_INSTALL_BIN_DIR)
+bootdir = $(libdir)/erlang/bin
 html_DATA = $(dist_erl_DATA:.erl=.html) erlang.png edoc-info stylesheet.css \
 	index.html overview-summary.html modules-frame.html packages-frame.html
 htmldir = $(ERLANG_INSTALL_LIB_DIR_http)/doc
