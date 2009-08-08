@@ -2668,7 +2668,7 @@ ERLANG_LIB_DIR=$ac_cv_erlang_lib_dir
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Erlang/OTP ERTS version" >&5
 $as_echo_n "checking for Erlang/OTP ERTS version... " >&6; }
-if test "${erlang_cv_erts_ver+set}" = set; then :
+if test "${ac_cv_erlang_erts_ver+set}" = set; then :
   $as_echo_n "(cached) " >&6
 else
   ac_ext=erl
@@ -2686,15 +2686,18 @@ else
 
 start() ->
 	    Version = erlang:system_info(version),
-            file:write_file("conftest.out", Version),
-            halt(0)
+	    file:write_file("conftest.out", Version),
+	    ReturnValue = 0,
+	    halt(ReturnValue)
 .
 
 _ACEOF
 if ac_fn_erl_try_run "$LINENO"; then :
-  erlang_cv_erts_ver=`cat conftest.out`
+  ac_cv_erlang_erts_ver=`cat conftest.out`
+	 rm -f conftest.out
 else
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+  rm -f conftest.out
+	 { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error "test Erlang program execution failed
 See \`config.log' for more details." "$LINENO" 5; }
@@ -2710,9 +2713,9 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $erlang_cv_erts_ver" >&5
-$as_echo "$erlang_cv_erts_ver" >&6; }
-ERLANG_ERTS_VER=$erlang_cv_erts_ver
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_erlang_erts_ver" >&5
+$as_echo "$ac_cv_erlang_erts_ver" >&6; }
+ERLANG_ERTS_VER=$ac_cv_erlang_erts_ver
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Erlang/OTP 'kernel' library subdirectory" >&5

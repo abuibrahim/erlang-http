@@ -124,8 +124,8 @@ handle_amf_message_body([{object, ?REMOTING_MESSAGE, Members} = Msg]) ->
 		Result ->
 		    acknowledge_msg(Msg, Result)
 	    catch
-		_Class:_Term ->
-		    throw(service_failure)
+		Class:Term ->
+		    throw({service_failure, Class, Term})
 	    end;
 	false ->
 	    throw(resource_unavailable)
@@ -137,15 +137,17 @@ error_msg(resource_unavailable) ->
     error_msg(<<"Server.ResourceUnavailable">>, <<"Resource Unavailable">>);
 error_msg(unsupported_operation) ->
     error_msg(<<"Server.Processing">>, <<"Unsupported Operation">>);
-error_msg(service_failure) ->
-    error_msg(<<"Server.Processing">>, <<"Service Failure">>);
-error_msg(_) ->
-    error_msg(<<"Server.Processing">>, <<"Unknown Error">>).
+error_msg({service_failure, Class, Term}) ->
+    FaultDetail = list_to_binary(io_lib:format("~p:~p", [Class, Term])),
+    error_msg(<<"Server.Processing">>, FaultDetail, <<"Service Failure">>).
 
 error_msg(FaultCode, FaultString) ->
+    error_msg(FaultCode, <<"Runtime Error">>, FaultString).
+
+error_msg(FaultCode, FaultDetail, FaultString) ->
     {object, ?ERROR_MESSAGE,
      [{faultCode, FaultCode},
-      {faultDetail, <<"Runtime Error">>},
+      {faultDetail, FaultDetail},
       {faultString, FaultString}]}.
 
 acknowledge_msg({object, _Class, Members}, Body) ->
