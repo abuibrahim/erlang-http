@@ -227,20 +227,20 @@ recv_headers(Socket, Acc) ->
     end.
 
 recv_body(Socket, Headers) ->
-    case lists:keysearch('Transfer-Encoding', 1, Headers) of
-	{value, {'Transfer-Encoding', "chunked"}} ->
-	    recv_chunked(Socket);
-	{value, {'Transfer-Encoding', TransferEncoding}} ->
-	    {error, {unknown_transfer_encoding, TransferEncoding}};
-	false ->
-	    Length = case lists:keysearch('Content-Length', 1, Headers) of
-			 {value, {'Content-Length', ContentLength}} ->
-			     list_to_integer(ContentLength);
-			 false ->
-			     0
+    case proplists:get_value('Transfer-Encoding', Headers) of
+	undefined ->
+	    Length = case proplists:get_value('Content-Length', Headers) of
+			 undefined ->
+			     0;
+			 ContentLength ->
+			     list_to_integer(ContentLength)
 		     end,
 	    http_lib:setopts(Socket, [{packet, raw}]),
-	    http_lib:recv(Socket, Length)
+	    http_lib:recv(Socket, Length);
+	"chunked" ->
+	    recv_chunked(Socket);
+	TransferEncoding ->
+	    {error, {unknown_transfer_encoding, TransferEncoding}}
     end.
 
 recv_chunked(Socket) ->
