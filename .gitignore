@@ -1,0 +1,13 @@
+Makefile
+config.log
+config.status
+*.beam
+*.app
+*.rel
+*.boot
+*.script
+src/overview.edoc
+src/*.html
+src/edoc-info
+src/erlang.png
+src/stylesheet.css
