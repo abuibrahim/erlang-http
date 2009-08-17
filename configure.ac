@@ -1,6 +1,6 @@
 AC_INIT([erlang-http], [1.0.0], [ruslan@babayev.com])
 
-AC_PREREQ([2.59c])
+AC_PREREQ([2.64])
 AC_COPYRIGHT([Copyright (C) 2009 Ruslan Babayev])
 AM_INIT_AUTOMAKE
 
