@@ -88,6 +88,7 @@ handle_amf_message(#amf_message{response = Response, body = Body}) ->
 -define(ACKNOWLEDGE_MESSAGE, <<"flex.messaging.messages.AcknowledgeMessage">>).
 -define(REMOTING_MESSAGE,    <<"flex.messaging.messages.RemotingMessage">>).
 -define(ERROR_MESSAGE,       <<"flex.messaging.messages.ErrorMessage">>).
+-define(ASYNC_MESSAGE,       <<"flex.messaging.messages.AsyncMessage">>).
 
 handle_amf_message_body([{object, ?COMMAND_MESSAGE, Members} = Msg]) ->
     case proplists:get_value(operation, Members) of
@@ -121,6 +122,24 @@ handle_amf_message_body([{object, ?REMOTING_MESSAGE, Members} = Msg]) ->
     case lists:member(Source, FlexServices) of
 	true ->
 	    try apply(Source, Operation, Body) of
+		Result ->
+		    acknowledge_msg(Msg, Result)
+	    catch
+		Class:Term ->
+		    throw({service_failure, Class, Term})
+	    end;
+	false ->
+	    throw(resource_unavailable)
+    end;
+handle_amf_message_body([{object, ?ASYNC_MESSAGE, Members} = Msg]) ->
+    Destination =
+	binary_to_atom(proplists:get_value(destination, Members), utf8),
+    Headers = proplists:get_value(headers, Members),
+    Body = proplists:get_value(body, Members),
+    {ok, FlexDestinations} = application:get_env(flex_destinations),
+    case lists:member(Destination, FlexDestinations) of
+	true ->
+	    try apply(Destination, 'send', [Headers, Body]) of
 		Result ->
 		    acknowledge_msg(Msg, Result)
 	    catch

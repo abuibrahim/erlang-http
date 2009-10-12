@@ -67,6 +67,7 @@
 %% 	 {aliases, [{"/icons", {priv_dir, http, icons}}]},
 	 {scripts, [{"/script", [http_esi_example]}]},
 	 {flex_services, []},
+	 {flex_destinations, []},
 	 {flex_auth, {http_mod_amf, auth}},
 	 {mime_types, {priv_dir, http, "mime_types.config"}},
 	 {max_cache_size, 500},
