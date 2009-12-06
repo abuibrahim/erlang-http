@@ -79,11 +79,11 @@ parse_params([Field | Rest], Acc) ->
     Field2 = re:replace(Field, "[\+]", " ", [global, {return, list}]),
     case re:split(Field2, "=", [{return, list}]) of
 	[Key, Value] ->
-	    K = list_to_atom(http_lib:urldecode(Key)),
-	    V = http_lib:urldecode(Value),
+	    K = list_to_atom(http_lib:url_decode(Key)),
+	    V = http_lib:url_decode(Value),
 	    parse_params(Rest, [{K, V} | Acc]);
 	[Key] ->
-	    K = list_to_atom(http_lib:urldecode(Key)),
+	    K = list_to_atom(http_lib:url_decode(Key)),
 	    parse_params(Rest, [K | Acc]);
 	_ ->
 	    parse_params(Rest, Acc)

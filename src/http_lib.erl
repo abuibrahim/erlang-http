@@ -1,27 +1,25 @@
-%%%-------------------------------------------------------------------
-%%% @author Ruslan Babayev <ruslan@babayev.com>
-%%% @copyright 2009, Ruslan Babayev
-%%% @doc HTTP Encoding and Utility Library.
-%%% @end
-%%% Created : 26 Jul 2009 by Ruslan Babayev <ruslan@babayev.com>
-%%%-------------------------------------------------------------------
+%%-------------------------------------------------------------------
+%% @author Ruslan Babayev <ruslan@babayev.com>
+%% @copyright 2009, Ruslan Babayev
+%% @doc HTTP Encoding and Utility Library.
+%% @end
+%%-------------------------------------------------------------------
 -module(http_lib).
 -export([uri_to_path/1, encode/1, list_to_absoluteURI/1, etag/1,
 	 local_time_to_rfc1123/1, rfc1123_to_date_time/1, mime_type/1,
 	 mime_type/2, extension/1, is_compressible/1, month_to_list/1,
-	 urldecode/1, chunk/1, response/1, response/2,
+	 url_decode/1, chunk/1, response/1, response/2,
 	 accept/1, recv/2, recv/3, send/2, setopts/2, close/1, peername/1,
 	 dir/1, is_persistent/1, is_idempotent/1, is_modified/2,
 	 reason_phrase/1]).
 
 -include("http.hrl").
 -include_lib("kernel/include/file.hrl").
+-include_lib("eunit/include/eunit.hrl").
 
-%%--------------------------------------------------------------------
 %% @doc Encodes HTTP request or response.
 %% @spec encode(#http_request{} | #http_response{}) -> iolist()
 %% @end
-%%--------------------------------------------------------------------
 encode(#http_request{version = {Major, Minor}, method = Method,
 		     uri = URI, headers = Headers, body = Body}) ->
     Headers1 = case proplists:is_defined('Host', Headers) of
@@ -160,20 +158,25 @@ is_persistent({1,0}, _) -> false;
 is_persistent(Version, "close") when Version >= {1,1} -> false;
 is_persistent(Version, _) when Version >= {1,1} -> true.
 
-urldecode([37, Hi, Lo | Rest]) ->
-    [erlang:list_to_integer([Hi, Lo], 16) | urldecode(Rest)];
-urldecode([$+ | Rest]) ->
-    [32 | urldecode(Rest)];
-urldecode([First | Rest]) ->
-    [First | urldecode(Rest)];
-urldecode([]) ->
-    [].
+url_decode(URL) ->
+    url_decode(URL, []).
 
-%%--------------------------------------------------------------------
+url_decode([], Acc) ->
+    lists:reverse(Acc);
+url_decode([37,H,L|T], Acc) ->
+    url_decode(T, [erlang:list_to_integer([H,L], 16) | Acc]);
+url_decode([$+|T], Acc) ->
+    url_decode(T, [32|Acc]);
+url_decode([H|T], Acc) ->
+    url_decode(T, [H|Acc]).
+
+url_decode_test() ->
+    ?assertEqual("I am decoded", url_decode("I+am+decoded")),
+    ?assertEqual("#$%&+=", url_decode("%23%24%25%26%2B%3Dm")).
+
 %% @doc Generates Etag based on file modification time and size.
 %% @spec etag(#file_info{}) -> string()
 %% @end
-%%--------------------------------------------------------------------
 etag(#file_info{mtime = MTime, size = Size}) ->
     {{Year,Month,Day},{Hour,Min,Sec}} = MTime,
     F = fun(X) when X =< 25 -> X + $A;

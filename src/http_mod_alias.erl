@@ -18,7 +18,7 @@ init() ->
 
 handle(_Socket, Request, Response, Flags) ->
     ReqPath = http_lib:uri_to_path(Request#http_request.uri),
-    DecodedPath = http_lib:urldecode(ReqPath),
+    DecodedPath = http_lib:url_decode(ReqPath),
     {ok, Aliases} = application:get_env(aliases),
     {ok, DocRoot} = application:get_env(docroot),
     Path1 = abs_path(DecodedPath, Aliases, http_lib:dir(DocRoot)),

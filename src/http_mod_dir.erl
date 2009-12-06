@@ -19,7 +19,7 @@ handle(_Socket, #http_request{method = 'GET', uri = URI}, undefined, Flags) ->
     Path = proplists:get_value(path, Flags),
     case proplists:get_value(file_info, Flags) of
 	FileInfo when FileInfo#file_info.type == directory ->
-	    ReqPath = http_lib:urldecode(http_lib:uri_to_path(URI)),
+	    ReqPath = http_lib:url_decode(http_lib:uri_to_path(URI)),
 	    case list_dir(Path, ReqPath) of
 		{ok, Dir} ->
 		    Headers = [{'Content-Type', "text/html"},
