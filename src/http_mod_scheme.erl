@@ -14,8 +14,7 @@
 init() ->
     ok.
 
-handle(_Socket, #http_request{uri = URI}, _Response, _Flags)
-  when is_record(URI, scheme) ->
+handle(_Socket, #http_request{uri = #scheme{}}, _Response, _Flags) ->
     http_lib:response(501);
 handle(_Socket, _Request, Response, Flags) ->
     {proceed, Response, Flags}.
