@@ -1,6 +1,6 @@
 @author Ruslan Babayev <ruslan@babayev.com>
 @copyright 2009 Ruslan Babayev
-@version @VERSION@
+@version 1.0.0
 @title http - Erlang HTTP/1.1 client and server. 
 @doc This is an implementation of an HTTP/1.1 compliant client and server,
 as defined in RFC 2616.

@@ -1,7 +1,7 @@
 %% -*-Erlang-*-
 {application, http,
  [{description, "HTTP Application"},
-  {vsn, "@VERSION@"},
+  {vsn, "1.0.0"},
   {modules, [http_app,
 	     http_sup,
 	     http_lib,
@@ -43,7 +43,7 @@
 	 {idle_timeout, 10000},
 	 {docroot, {priv_dir, http, htdocs}},
 	 {indices, ["index.html"]},
-	 {server, "@PACKAGE@/@VERSION@"},
+	 {server, "erlang-http/1.0.0"},
 	 {modules, [http_mod_scheme,
 		    http_mod_options,
 		    http_mod_trace,
