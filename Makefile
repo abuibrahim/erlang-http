@@ -2,7 +2,9 @@ APP=http
 ERL=ERL
 ERLC=ERLC
 
-all:
+all: compile
+
+compile:
 	@$(ERL) -make
 
 clean:
@@ -17,6 +19,6 @@ clean-docs:
 run:
 	@$(ERL) -pa ebin -run http
 
-test:
-	@$(ERL) -pa ebin -eval "eunit:test({application,http},[verbose])" \
+test: compile
+	@$(ERL) -pa ebin -eval "eunit:test({application,http})" \
 	-noshell -s init stop
