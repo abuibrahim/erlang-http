@@ -16,3 +16,7 @@ clean-docs:
 
 run:
 	@$(ERL) -pa ebin -run http
+
+test:
+	@$(ERL) -pa ebin -eval "eunit:test({application,http},[verbose])" \
+	-noshell -s init stop
