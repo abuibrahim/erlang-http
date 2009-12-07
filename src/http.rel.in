@@ -1,9 +1,0 @@
-%% -*-Erlang-*-
-{release, {"http", "@VERSION@"}, {erts, "@ERLANG_ERTS_VER@"},
- [{kernel, "@ERLANG_LIB_VER_kernel@"},
-  {stdlib, "@ERLANG_LIB_VER_stdlib@"},
-  {crypto, "@ERLANG_LIB_VER_crypto@"},
-  {ssl, "@ERLANG_LIB_VER_ssl@"},
-  {amf, "@ERLANG_LIB_VER_amf@"},
-  {http, "@VERSION@"}
- ]}.
