@@ -3,8 +3,7 @@ ERL=ERL
 ERLC=ERLC
 
 all:
-	@(cd src; erl -make)
-	@(cd examples; erl -make)
+	@$(ERL) -make
 
 clean:
 	-@rm -f ebin/*.beam
