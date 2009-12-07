@@ -172,7 +172,7 @@ url_decode([H|T], Acc) ->
 
 url_decode_test() ->
     ?assertEqual("I am decoded", url_decode("I+am+decoded")),
-    ?assertEqual("#$%&+=", url_decode("%23%24%25%26%2B%3Dm")).
+    ?assertEqual("#$%&+=", url_decode("%23%24%25%26%2B%3D")).
 
 %% @doc Generates Etag based on file modification time and size.
 %% @spec etag(#file_info{}) -> string()
