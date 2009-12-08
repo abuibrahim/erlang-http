@@ -1,0 +1,3 @@
+[submodule "deps/erlang-amf"]
+	path = deps/erlang-amf
+	url = git://github.com/mujaheed/erlang-amf.git
