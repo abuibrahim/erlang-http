@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml">
+  <mx:Script source="stock.as" />
+  <mx:RemoteObject id="ro" source="stock" destination="my-destination"
+		   showBusyCursor="true" fault="faultHandler(event)">
+    <mx:method name="symbols" result="symbolsHandler(event)"/>
+    <mx:method name="quote" result="quoteHandler(event)">
+      <mx:arguments>
+	<symbol>{stockSymbol.selectedItem}</symbol>
+      </mx:arguments>
+    </mx:method>
+  </mx:RemoteObject>
+  <mx:Panel title="Stock Quote Example">
+    <mx:Form>
+      <mx:FormItem label="Symbol">
+	<mx:ComboBox id="stockSymbol" dataProvider="{Symbols}"
+		     creationComplete="ro.symbols()" change="ro.quote()"/>
+      </mx:FormItem>
+      <mx:FormItem label="Price">
+	<mx:Label id="stockPrice"/>
+      </mx:FormItem>
+    </mx:Form>
+  </mx:Panel>
+</mx:Application>

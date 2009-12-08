@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services-config>
+  <services>
+    <service id="my-service"
+	     class="flex.messaging.services.RemotingService"
+	     messageTypes="flex.messaging.messages.RemotingMessage">
+      <destination id="my-destination">
+	<channels>
+	  <!-- try secure channel first, if it fails fall back on normal -->
+	  <!-- <channel ref="my-secure-channel"/> -->
+	  <channel ref="my-channel"/>
+	</channels>
+	<properties>
+	  <source>*</source>
+	</properties>
+      </destination>
+    </service>
+  </services>
+  <channels>
+    <!--
+    <channel-definition id="my-secure-channel"
+			class="mx.messaging.channels.SecureAMFChannel">
+      <endpoint uri="https://{server.name}:{server.port}"
+		class="flex.messaging.endpoints.SecureAMFEndpoint"/>
+    </channel-definition>
+    -->
+    <channel-definition id="my-channel"
+			class="mx.messaging.channels.AMFChannel">
+      <endpoint uri="http://{server.name}:{server.port}"
+		class="flex.messaging.endpoints.AMFEndpoint"/>
+    </channel-definition>
+  </channels>
+</services-config>

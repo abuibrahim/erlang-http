@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml">
+  <mx:Script source="persons.as" />
+  <mx:RemoteObject id="ro" source="persons" destination="my-destination"
+		   showBusyCursor="true" fault="faultHandler(event)">
+    <mx:method name="get" result="resultHandler(event)">
+    </mx:method>
+  </mx:RemoteObject>
+  <mx:DataGrid id="dg" dataProvider="{dp}">
+    <mx:columns>
+      <mx:DataGridColumn headerText="FirstName" dataField="firstName"/>
+      <mx:DataGridColumn headerText="LastName" dataField="lastName"/>
+      <mx:DataGridColumn headerText="Age" dataField="age"/>
+      <mx:DataGridColumn headerText="Phone" dataField="phone"/>
+      <mx:DataGridColumn headerText="Email" dataField="email"/>
+    </mx:columns>
+  </mx:DataGrid>
+  <mx:Button label="Get List" click="ro.get()"/>
+</mx:Application>
