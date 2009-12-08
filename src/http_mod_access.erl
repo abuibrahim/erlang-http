@@ -1,12 +1,11 @@
-%%%-------------------------------------------------------------------
-%%% @author Ruslan Babayev <ruslan@babayev.com>
-%%% @copyright 2009, Ruslan Babayev
-%%% @doc This module implements access control based on file access mode.
-%%% Uses `path' and sets `file_info' flags.
-%%% @end
-%%%-------------------------------------------------------------------
+%% @author Ruslan Babayev <ruslan@babayev.com>
+%% @copyright 2009, Ruslan Babayev
+%% @doc This module implements access control based on file access mode.
+%%      Uses `path' and sets `file_info' flags.
+
 -module(http_mod_access).
 -author('ruslan@babayev.com').
+
 -export([init/0, handle/4]).
 
 -include("http.hrl").

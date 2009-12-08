@@ -1,10 +1,6 @@
-%%%-------------------------------------------------------------------
-%%% @author Ruslan Babayev <ruslan@babayev.com>
-%%% @copyright 2009, Ruslan Babayev
-%%% @doc HTTP Application.
-%%% @end
-%%% Created : 26 Jul 2009 by Ruslan Babayev <ruslan@babayev.com>
-%%%-------------------------------------------------------------------
+%% @author Ruslan Babayev <ruslan@babayev.com>
+%% @copyright 2009, Ruslan Babayev
+%% @doc HTTP Application.
 -module(http_app).
 -author('ruslan@babayev.com').
 
@@ -13,42 +9,17 @@
 %% Application callbacks
 -export([start/2, stop/1]).
 
-%%%===================================================================
-%%% Application callbacks
-%%%===================================================================
-
-%%--------------------------------------------------------------------
-%% @private
-%% @doc
-%% This function is called whenever an application is started using
-%% application:start/[1,2], and should start the processes of the
-%% application. If the application is structured according to the OTP
-%% design principles as a supervision tree, this means starting the
-%% top supervisor of the tree.
-%%
+%% @doc Starts the application.
 %% @spec start(StartType, StartArgs) -> {ok, Pid} |
 %%                                      {ok, Pid, State} |
 %%                                      {error, Reason}
 %%      StartType = normal | {takeover, Node} | {failover, Node}
 %%      StartArgs = term()
 %% @end
-%%--------------------------------------------------------------------
 start(_StartType, _StartArgs) ->
     http_sup:start_link().
 
-%%--------------------------------------------------------------------
-%% @private
-%% @doc
-%% This function is called whenever an application has stopped. It
-%% is intended to be the opposite of Module:start/2 and should do
-%% any necessary cleaning up. The return value is ignored.
-%%
+%% @doc Stops the appolication.
 %% @spec stop(State) -> void()
-%% @end
-%%--------------------------------------------------------------------
 stop(_State) ->
     ok.
-
-%%%===================================================================
-%%% Internal functions
-%%%===================================================================

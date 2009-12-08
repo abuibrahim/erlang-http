@@ -1,16 +1,16 @@
-%%%-------------------------------------------------------------------
-%%% @author Ruslan Babayev <ruslan@babayev.com>
-%%% @copyright 2009, Ruslan Babayev
-%%% @doc This module handles Flex remoting requests.
-%%% Uses `flex_services' and `flex_auth' environment variables.
-%%% @end
-%%%-------------------------------------------------------------------
+%% @author Ruslan Babayev <ruslan@babayev.com>
+%% @copyright 2009, Ruslan Babayev
+%% @doc This module handles Flex remoting requests.
+%%      Uses `flex_services' and `flex_auth' environment variables.
+
 -module(http_mod_amf).
 -author('ruslan@babayev.com').
+
 -export([init/0, handle/4, auth/2]).
 
 -include("http.hrl").
--include_lib("amf/include/amf.hrl").
+%%-include_lib("amf/include/amf.hrl").
+-include("amf.hrl").
 
 init() ->
     case application:start(amf) of

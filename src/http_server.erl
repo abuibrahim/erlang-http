@@ -1,14 +1,10 @@
-%%%-------------------------------------------------------------------
 %%% @author Ruslan Babayev <ruslan@babayev.com>
 %%% @copyright 2009, Ruslan Babayev
 %%% @doc HTTP Server.
-%%% @end
-%%% Created : 26 Jul 2009 by Ruslan Babayev <ruslan@babayev.com>
-%%%-------------------------------------------------------------------
+
 -module(http_server).
 -author('ruslan@babayev.com').
 
-%% API
 -export([start_link/0]).
 
 -include("http.hrl").
@@ -25,15 +21,8 @@
 		chunk = <<>>,
 		timeout}).
 
-%%%===================================================================
-%%% API
-%%%===================================================================
-
-%%--------------------------------------------------------------------
 %% @doc Starts the server.
 %% @spec start_link() -> {ok, Pid} | ignore | {error, Error}
-%% @end
-%%--------------------------------------------------------------------
 start_link() ->
     {ok, Modules} = application:get_env(modules),
     {ok, Timeout} = application:get_env(idle_timeout),
@@ -47,12 +36,9 @@ start_link() ->
 	    {stop, Reason}
     end.
 
-%%--------------------------------------------------------------------
 %% @private
 %% @doc Initializes modules.
 %% @spec init(Modules::list()) -> ok | {error, Error}
-%% @end
-%%--------------------------------------------------------------------
 init([]) ->
     ok;
 init([Module | Rest]) ->

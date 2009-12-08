@@ -1,12 +1,11 @@
-%%%-------------------------------------------------------------------
-%%% @author Ruslan Babayev <ruslan@babayev.com>
-%%% @copyright 2009, Ruslan Babayev
-%%% @doc This module implements deflate compression for `GET' requests.
-%%% Uses `path' flag.
-%%% @end
-%%%-------------------------------------------------------------------
+%% @author Ruslan Babayev <ruslan@babayev.com>
+%% @copyright 2009, Ruslan Babayev
+%% @doc This module implements deflate compression for `GET' requests.
+%%      Uses `path' flag.
+
 -module(http_mod_deflate).
 -author('ruslan@babayev.com').
+
 -export([init/0, handle/4]).
 
 -include("http.hrl").

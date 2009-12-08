@@ -1,13 +1,12 @@
-%%%-------------------------------------------------------------------
-%%% @author Ruslan Babayev <ruslan@babayev.com>
-%%% @copyright 2009, Ruslan Babayev
-%%% @doc This module handles requests that include `If-Match' and
-%%% `If-None-Match' headers.
-%%% Uses `file_info' flag.
-%%% @end
-%%%-------------------------------------------------------------------
+%% @author Ruslan Babayev <ruslan@babayev.com>
+%% @copyright 2009, Ruslan Babayev
+%% @doc This module handles requests that include `If-Match' and
+%%      `If-None-Match' headers.
+%%      Uses `file_info' flag.
+
 -module(http_mod_match).
 -author('ruslan@babayev.com').
+
 -export([init/0, handle/4]).
 
 -include("http.hrl").

@@ -1,13 +1,12 @@
-%%%-------------------------------------------------------------------
-%%% @author Ruslan Babayev <ruslan@babayev.com>
-%%% @copyright 2009, Ruslan Babayev
-%%% @doc This module implements ETS based cache.
-%%% Uses `path' and `file_info' flags as well as `max_size_cached_file',
-%%% `max_cache_size' and `max_cache_memory' environment variables.
-%%% @end
-%%%-------------------------------------------------------------------
+%% @author Ruslan Babayev <ruslan@babayev.com>
+%% @copyright 2009, Ruslan Babayev
+%% @doc This module implements ETS based cache.
+%%      Uses `path' and `file_info' flags as well as `max_size_cached_file',
+%%      `max_cache_size' and `max_cache_memory' environment variables.
+
 -module(http_mod_cache).
 -author('ruslan@babayev.com').
+
 -export([init/0, handle/4]).
 
 -include("http.hrl").

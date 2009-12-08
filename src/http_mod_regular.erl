@@ -1,13 +1,12 @@
-%%%-------------------------------------------------------------------
-%%% @author Ruslan Babayev <ruslan@babayev.com>
-%%% @copyright 2009, Ruslan Babayev
-%%% @doc This module handles `GET' requests to regular files.
-%%% Uses `path' and `file_info' flags as well as `mime_types'
-%%% environment variable.
-%%% @end
-%%%-------------------------------------------------------------------
+%% @author Ruslan Babayev <ruslan@babayev.com>
+%% @copyright 2009, Ruslan Babayev
+%% @doc This module handles `GET' requests to regular files.
+%%      Uses `path' and `file_info' flags and `mime_types'
+%%      environment variable.
+
 -module(http_mod_regular).
 -author('ruslan@babayev.com').
+
 -export([init/0, handle/4]).
 
 -include("http.hrl").
