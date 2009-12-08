@@ -1,24 +1,28 @@
-APP=http
 ERL=ERL
 ERLC=ERLC
+APP=http
 
 all: compile
 
 compile:
 	@$(ERL) -make
+	@(for dir in deps/*; do cd $$dir; $(MAKE); done)
 
 clean:
-	-@rm -f ebin/*.beam
+	@echo "removing:"
+	@rm -fv ebin/*.beam
+	@rm -fv deps/*/ebin/*.beam
 
 docs:
 	@$(ERL) -noshell -run edoc_run application '$(APP)' '"."' '[]'
 
 clean-docs:
-	-@rm -f doc/edoc-info doc/*.html doc/*.css doc/*.png
+	@echo "removing:"
+	@rm -fv doc/edoc-info doc/*.html doc/*.css doc/*.png
 
-run:
-	@$(ERL) -pa ebin -run http
+run: compile
+	@$(ERL) -pa ebin deps/*/ebin -s $(APP)
 
 test: compile
-	@$(ERL) -pa ebin -eval "eunit:test({application,http})" \
+	@$(ERL) -pa ebin -eval "eunit:test({application,$(APP)})" \
 	-noshell -s init stop
