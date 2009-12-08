@@ -65,7 +65,7 @@
 		    http_mod_md5]},
 	 {aliases, []},
 %% 	 {aliases, [{"/icons", {priv_dir, http, icons}}]},
-	 {scripts, [{"/script", [http_esi_example]}]},
+%%	 {scripts, [{"/script", [http_esi_example]}]},
 	 {flex_services, []},
 	 {flex_destinations, []},
 	 {flex_auth, {http_mod_amf, auth}},
