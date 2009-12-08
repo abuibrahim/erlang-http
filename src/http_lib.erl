@@ -1,9 +1,7 @@
-%%-------------------------------------------------------------------
 %% @author Ruslan Babayev <ruslan@babayev.com>
 %% @copyright 2009, Ruslan Babayev
 %% @doc HTTP Encoding and Utility Library.
-%% @end
-%%-------------------------------------------------------------------
+
 -module(http_lib).
 -export([uri_to_path/1, encode/1, list_to_absoluteURI/1, etag/1,
 	 local_time_to_rfc1123/1, rfc1123_to_date_time/1, mime_type/1,
@@ -19,7 +17,6 @@
 
 %% @doc Encodes HTTP request or response.
 %% @spec encode(#http_request{} | #http_response{}) -> iolist()
-%% @end
 encode(#http_request{version = {Major, Minor}, method = Method,
 		     uri = URI, headers = Headers, body = Body}) ->
     Headers1 = case proplists:is_defined('Host', Headers) of
@@ -176,7 +173,6 @@ url_decode_test() ->
 
 %% @doc Generates Etag based on file modification time and size.
 %% @spec etag(#file_info{}) -> string()
-%% @end
 etag(#file_info{mtime = MTime, size = Size}) ->
     {{Year,Month,Day},{Hour,Min,Sec}} = MTime,
     F = fun(X) when X =< 25 -> X + $A;
@@ -224,17 +220,24 @@ response(Code, Reason) ->
     #http_response{status = Code, headers = Headers, body = Reason}.
 
 dir(priv_dir) ->
-    code:priv_dir(http);
-dir({priv_dir, App}) ->
-    code:priv_dir(App);
-dir({priv_dir, App, SubDir}) ->
-    filename:join([code:priv_dir(App), any_to_list(SubDir)]);
+    priv_dir(http);
+dir({priv_dir, Module}) ->
+    priv_dir(Module);
+dir({priv_dir, Module, SubDir}) ->
+    filename:join([priv_dir(Module), any_to_list(SubDir)]);
 dir({lib_dir, SubDir}) ->
     code:lib_dir(http, SubDir);
 dir({lib_dir, App, SubDir}) ->
     code:lib_dir(App, SubDir);
 dir(Path) when is_list(Path) ->
     Path.
+
+priv_dir(Module) ->
+    filename:join(get_base_dir(Module), "priv").
+
+get_base_dir(Module) ->
+    {file, Here} = code:is_loaded(Module),
+    filename:dirname(filename:dirname(Here)).
 
 accept(Socket) when element(1, Socket) == sslsocket ->
     case ssl:transport_accept(Socket) of
@@ -281,7 +284,7 @@ peername(Socket) when element(1, Socket) == sslsocket ->
 peername(Socket) ->
     gen_tcp:peername(Socket).
 
-%%% RFC 2616, HTTP 1.1 Status codes
+%% RFC 2616, HTTP 1.1 Status codes
 reason_phrase(100) -> "Continue";
 reason_phrase(101) -> "Switching Protocols";
 reason_phrase(200) -> "OK";
@@ -323,17 +326,17 @@ reason_phrase(502) -> "Bad Gateway";
 reason_phrase(503) -> "Service Unavailable";
 reason_phrase(504) -> "Gateway Time-out";
 reason_phrase(505) -> "HTTP Version not supported";
-%%% RFC 2518, HTTP Extensions for Distributed Authoring -- WEBDAV
+%% RFC 2518, HTTP Extensions for Distributed Authoring -- WEBDAV
 reason_phrase(102) -> "Processing";
 reason_phrase(207) -> "Multi-Status";
 reason_phrase(422) -> "Unprocessable Entity";
 reason_phrase(423) -> "Locked";
 reason_phrase(424) -> "Failed Dependency";
 reason_phrase(507) -> "Insufficient Storage";
-%%% (Work in Progress) WebDAV Advanced Collections
+%% (Work in Progress) WebDAV Advanced Collections
 reason_phrase(425) -> "";
-%%% RFC 2817, HTTP Upgrade to TLS
+%% RFC 2817, HTTP Upgrade to TLS
 reason_phrase(426) -> "Upgrade Required";
-%%% RFC 3229, Delta encoding in HTTP
+%% RFC 3229, Delta encoding in HTTP
 reason_phrase(226) -> "IM Used";
 reason_phrase(_)   -> "Internal Server Error".
