@@ -31,7 +31,8 @@ handle(_Socket, #http_request{method = 'GET'}, undefined, Flags) ->
 		    %% cache entry is either missing or stale
 		    case file:read_file(Path) of
 			{ok, Bin} ->
-			    insert(http_cache, {Path, FI#file_info.mtime, Bin}),
+			    Entry = {Path, FI#file_info.mtime, Bin},
+			    insert(http_cache, Entry),
 			    H = headers(FI, Path),
 			    Response = #http_response{headers = H, body = Bin},
 			    {proceed, Response, Flags};
