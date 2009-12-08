@@ -5,3 +5,14 @@ different API.
 
 One of the modules is http_mod_amf which implements Flex remoting services.
 The build depends on erlang-amf.
+
+Getting started:
+
+git clone git://github.com/mujaheed/erlang-http.git
+cd erlang-http
+git submodule init
+git submodule update
+make
+make run
+
+open http://localhost:8080
