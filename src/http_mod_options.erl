@@ -15,5 +15,5 @@ init() ->
 handle(_Socket, #http_request{method = 'OPTIONS', uri = '*'}, _Response, _F) ->
     Headers = [{'Allow', "GET,HEAD,OPTIONS,PUT,POST,DELETE"}],
     #http_response{headers = Headers};
-handle(_Socket, _Request, Response, Flags) ->
-    {proceed, Response, Flags}.
+handle(_Socket, Request, Response, Flags) ->
+    {proceed, Request, Response, Flags}.

@@ -14,28 +14,29 @@
 init() ->
     ok.
 
-handle(_Socket, #http_request{headers = Headers}, undefined, Flags) ->
+handle(_Socket, Request, undefined, Flags) ->
     FileInfo = proplists:get_value(file_info, Flags),
+    #http_request{headers = Headers} = Request,
     case proplists:get_value('If-Modified-Since', Headers) of
 	undefined ->
 	    case proplists:get_value('If-Unmodified-Since', Headers) of
 		undefined ->
-		    {proceed, undefined, Flags};
+		    {proceed, Request, undefined, Flags};
 		Since ->
 		    case http_lib:is_modified(FileInfo, Since) of
 			true ->
 			    http_lib:response(412);
 			false ->
-			    {proceed, undefined, Flags}
+			    {proceed, Request, undefined, Flags}
 		    end
 	    end;
 	Since ->
 	    case http_lib:is_modified(FileInfo, Since) of
 		true ->
-		    {proceed, undefined, Flags};
+		    {proceed, Request, undefined, Flags};
 		false ->
 		    http_lib:response(304)
 	    end
     end;
-handle(_Socket, _Request, Response, Flags) ->
-    {proceed, Response, Flags}.
+handle(_Socket, Request, Response, Flags) ->
+    {proceed, Request, Response, Flags}.

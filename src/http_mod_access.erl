@@ -14,15 +14,15 @@
 init() ->
     ok.
 
-handle(_Socket, _Request, undefined, Flags) ->
+handle(_Socket, Request, undefined, Flags) ->
     Path = proplists:get_value(path, Flags),
     case file:read_file_info(Path) of
 	{ok, #file_info{access = A} = FI} when A == read; A == read_write ->
-	    {proceed, undefined, [{file_info, FI} | Flags]};
+	    {proceed, Request, undefined, [{file_info, FI} | Flags]};
 	{ok, _FileInfo} ->
 	    http_lib:response(403);
 	{error, _Reason} ->
 	    http_lib:response(404)
     end;
-handle(_Socket, _Request, Response, Flags) ->
-    {proceed, Response, Flags}.
+handle(_Socket, Request, Response, Flags) ->
+    {proceed, Request, Response, Flags}.

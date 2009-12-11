@@ -9,7 +9,6 @@
 -export([init/0, handle/4, auth/2]).
 
 -include("http.hrl").
-%%-include_lib("amf/include/amf.hrl").
 -include("amf.hrl").
 
 init() ->
@@ -30,12 +29,13 @@ handle(_Socket, #http_request{method = 'POST'} = Request, Response, Flags) ->
 	    Body = amf:encode_packet(AMFResponse),
 	    Headers = [{'Content-Type', "application/x-amf"},
 		       {'Content-Length', size(Body)}],
-	    {proceed, #http_response{headers = Headers, body = Body}, Flags};
+	    Response1 = #http_response{headers = Headers, body = Body},
+	    {proceed, Request, Response1, Flags};
 	_ ->
-	    {proceed, Response, Flags}
+	    {proceed, Request, Response, Flags}
     end;
-handle(_Socket, _Request, Response, Flags) ->
-    {proceed, Response, Flags}.
+handle(_Socket, Request, Response, Flags) ->
+    {proceed, Request, Response, Flags}.
 
 auth(Username, Password) ->
     error_logger:info_report({?MODULE, auth, Username, Password}),

@@ -22,11 +22,11 @@ handle(_Socket, Request, undefined, Flags) ->
 	undefined ->
 	    case proplists:get_value('If-None-Match', Headers) of
 		undefined ->
-		    {proceed, undefined, Flags};
+		    {proceed, Request, undefined, Flags};
 		Etags ->
 		    case member(Etag, string:tokens(Etags, ", ")) of
 			false ->
-			    {proceed, undefined, Flags};
+			    {proceed, Request, undefined, Flags};
 			true when Method == 'GET'; Method == 'HEAD' ->
 			    http_lib:response(304);
 			true ->
@@ -36,13 +36,13 @@ handle(_Socket, Request, undefined, Flags) ->
 	Etags ->
 	    case member(Etag, string:tokens(Etags, ", ")) of
 		true ->
-		    {proceed, undefined, Flags};
+		    {proceed, Request, undefined, Flags};
 		false ->
 		    http_lib:response(412)
 	    end
     end;
-handle(_Socket, _Request, Response, Flags) ->
-    {proceed, Response, Flags}.
+handle(_Socket, Request, Response, Flags) ->
+    {proceed, Request, Response, Flags}.
 
 member(Element, List) ->
     lists:member("*", List) orelse lists:member(Element, List).

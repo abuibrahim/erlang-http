@@ -13,8 +13,7 @@
 init() ->
     ok.
 
-handle(_Socket, Request, Response, Flags)
-  when Request#http_request.method == 'GET' ->
+handle(_Socket, #http_request{method = 'GET'} = Request, Response, Flags) ->
     Headers = Request#http_request.headers,
     Path = proplists:get_value(path, Flags),
     case accepts_gzip(Headers) andalso http_lib:is_compressible(Path) of
@@ -22,18 +21,18 @@ handle(_Socket, Request, Response, Flags)
 	    ResponseHeaders = Response#http_response.headers,
 	    case proplists:is_defined('Content-Encoding', ResponseHeaders) of
 		false ->
-		    {proceed, vary(gzip(Response)), Flags};
+		    {proceed, Request, vary(gzip(Response)), Flags};
 		true ->
-		    {proceed, vary(Response), Flags}
+		    {proceed, Request, vary(Response), Flags}
 	    end;
 	false ->
-	    {proceed, vary(Response), Flags}
+	    {proceed, Request, vary(Response), Flags}
     end;
-handle(_Socket, _Request, undefined, Flags) ->
-    {proceed, undefined, Flags};
-handle(_Socket, _Request, Response, Flags)
+handle(_Socket, Request, undefined, Flags) ->
+    {proceed, Request, undefined, Flags};
+handle(_Socket, Request, Response, Flags)
   when is_record(Response, http_response) ->
-    {proceed, vary(Response), Flags}.
+    {proceed, Request, vary(Response), Flags}.
 
 accepts_gzip(Headers) ->
     case proplists:get_value('Accept-Encoding', Headers) of

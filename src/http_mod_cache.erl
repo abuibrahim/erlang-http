@@ -16,7 +16,7 @@ init() ->
     ets:new(http_cache, [set, public, named_table]),
     ok.
 
-handle(_Socket, #http_request{method = 'GET'}, undefined, Flags) ->
+handle(_Socket, #http_request{method = 'GET'} = Request, undefined, Flags) ->
     {ok, MaxSize} = application:get_env(max_size_cached_file),
     case proplists:get_value(file_info, Flags) of
 	FI when FI#file_info.type == regular, FI#file_info.size < MaxSize ->
@@ -26,7 +26,7 @@ handle(_Socket, #http_request{method = 'GET'}, undefined, Flags) ->
 		    %% a fresh cache entry found
 		    H = headers(FI, Path),
 		    Response = #http_response{headers = H, body = Bin},
-		    {proceed, Response, Flags};
+		    {proceed, Request, Response, Flags};
 		_ ->
 		    %% cache entry is either missing or stale
 		    case file:read_file(Path) of
@@ -35,16 +35,16 @@ handle(_Socket, #http_request{method = 'GET'}, undefined, Flags) ->
 			    insert(http_cache, Entry),
 			    H = headers(FI, Path),
 			    Response = #http_response{headers = H, body = Bin},
-			    {proceed, Response, Flags};
+			    {proceed, Request, Response, Flags};
 			{error, _Reason} ->
 			    http_lib:response(404)
 		    end
 	    end;
 	_ ->
-	    {proceed, undefined, Flags}
+	    {proceed, Request, undefined, Flags}
     end;
-handle(_Socket, _Request, Response, Flags) ->
-    {proceed, Response, Flags}.
+handle(_Socket, Request, Response, Flags) ->
+    {proceed, Request, Response, Flags}.
 
 headers(#file_info{mtime = Time, size = Size} = FileInfo, Path) ->
     Headers1 =

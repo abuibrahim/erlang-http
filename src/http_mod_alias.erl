@@ -23,12 +23,12 @@ handle(_Socket, Request, Response, Flags) ->
     Path1 = abs_path(DecodedPath, Aliases, http_lib:dir(DocRoot)),
     {ok, Indices} = application:get_env(indices),
     Path2 = maybe_append_index(Path1, Indices),
-    [Path3 | _] = string:tokens(Path2, "?"),
-    {proceed, Response, [{path, Path3} | Flags]}.
+    [Path3|_] = string:tokens(Path2, "?"),
+    {proceed, Request, Response, [{path,Path3}|Flags]}.
 
 abs_path(ReqPath, [], DocRoot) ->
     DocRoot ++ ReqPath;
-abs_path(ReqPath, [{Alias, Path} | Rest], DocRoot) ->
+abs_path(ReqPath, [{Alias,Path}|Rest], DocRoot) ->
     case string:str(ReqPath, Alias) of
 	1 ->
 	    http_lib:dir(Path) ++ string:substr(ReqPath, length(Alias) + 1);
@@ -46,7 +46,7 @@ maybe_append_index(Path, Indices) ->
 
 append_index(Path, []) ->
     Path;
-append_index(Path, [Index | Rest]) ->
+append_index(Path, [Index|Rest]) ->
     case file:read_file_info(filename:join(Path, Index)) of
 	{error, _Reason} ->
 	    append_index(Path, Rest);

@@ -19,7 +19,7 @@ init() ->
     ets:insert(http_mime_types, MimeTypes),
     ok.
 
-handle(Socket, #http_request{method = 'GET'}, undefined, Flags) ->
+handle(Socket, #http_request{method = 'GET'} = Request, undefined, Flags) ->
     case proplists:get_value(file_info, Flags) of
 	FI when FI#file_info.type == regular ->
 	    Path = proplists:get_value(path, Flags),
@@ -46,10 +46,10 @@ handle(Socket, #http_request{method = 'GET'}, undefined, Flags) ->
 		    http_lib:response(404)
 	    end;
 	_ ->
-	    {proceed, undefined, Flags}
+	    {proceed, Request, undefined, Flags}
     end;
-handle(_Socket, _Request, Response, Flags) ->
-    {proceed, Response, Flags}.
+handle(_Socket, Request, Response, Flags) ->
+    {proceed, Request, Response, Flags}.
 
 send_in_blocks(Socket, IoDevice, BlockSize) ->
     case file:read(IoDevice, BlockSize) of

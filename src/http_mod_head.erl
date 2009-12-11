@@ -14,7 +14,7 @@
 init() ->
     ok.
 
-handle(_Socket, #http_request{method = 'HEAD'}, undefined, Flags) ->
+handle(_Socket, #http_request{method = 'HEAD'} = Request, undefined, Flags) ->
     FI = proplists:get_value(file_info, Flags),
     Size = FI#file_info.size,
     LM = http_lib:local_time_to_rfc1123(FI#file_info.mtime),
@@ -25,6 +25,6 @@ handle(_Socket, #http_request{method = 'HEAD'}, undefined, Flags) ->
 	      MimeType  -> [{'Content-Type', MimeType} | H1]
 	  end,
     Response = #http_response{status = 200, headers = H2, body = <<>>},
-    {proceed, Response, Flags};
-handle(_Socket, _Request, Response, Flags) ->
-    {proceed, Response, Flags}.
+    {proceed, Request, Response, Flags};
+handle(_Socket, Request, Response, Flags) ->
+    {proceed, Request, Response, Flags}.

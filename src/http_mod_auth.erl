@@ -36,7 +36,7 @@ handle(Socket, Request, Response, Flags) ->
 		    http_lib:response(403)
 	    end;
 	nomatch ->
-	    {proceed, Response, Flags}
+	    {proceed, Request, Response, Flags}
     end.
 
 path_match(Path, Directories) ->
@@ -76,9 +76,9 @@ matches(Address, [Pattern | Rest]) ->
     end.
 
 matches2(Tuple, Pattern) when size(Tuple) == size(Pattern) ->
-    Match = fun({X, X}) -> true;
-	       ({_, '_'}) -> true;
-	       ({_, _}) -> false
+    Match = fun({X,X}) -> true;
+	       ({_,'_'}) -> true;
+	       ({_,_}) -> false
 	    end,
     Zipped = lists:zip(tuple_to_list(Tuple), tuple_to_list(Pattern)),
     lists:all(Match, Zipped);
@@ -90,7 +90,7 @@ auth(Request, Response, DirOpts, Flags) ->
     ValidGroups = proplists:get_value(require_group, DirOpts, []),
     case ValidGroups of
 	undefined when ValidUsers == undefined ->
-	    {proceed, Response, Flags};
+	    {proceed, Request, Response, Flags};
 	_ ->
 	    Headers = Request#http_request.headers,
 	    case proplists:get_value('Authorization', Headers) of
@@ -99,7 +99,7 @@ auth(Request, Response, DirOpts, Flags) ->
 		"Basic " ++ Encoded ->
 		    try base64:decode_to_string(Encoded) of
 			Decoded ->
-			    validate_user(Response, Flags, DirOpts,
+			    validate_user(Request, Response, Flags, DirOpts,
 					  ValidUsers, ValidGroups, Decoded)
 		    catch
 			exit:_ -> http_lib:response(401)
@@ -125,14 +125,15 @@ www_authenticate_response(Realm) ->
 	       {'WWW-Authenticate', "Basic realm=\"" ++ Realm ++ "\""}],
     #http_response{status = 401, headers = Headers, body = Body}.
 
-validate_user(Response, Flags, DirOpts, ValidUsers, ValidGroups, Decoded) ->
+validate_user(Request, Response, Flags, DirOpts,
+	      ValidUsers, ValidGroups, Decoded) ->
     try re:split(Decoded, ":", [{parts, 2}, {return, list}]) of
 	[UserName, Password] ->
  	    case lists:member(UserName, ValidUsers) of
  		true ->
  		    case is_valid_user(UserName, Password, DirOpts) of
  			true ->
- 			    {proceed, Response, Flags};
+ 			    {proceed, Request, Response, Flags};
  			false ->
  			    authorization_required(DirOpts)
  		    end;
@@ -141,7 +142,7 @@ validate_user(Response, Flags, DirOpts, ValidUsers, ValidGroups, Decoded) ->
  			true ->
  			    case is_valid_user(UserName, Password, DirOpts) of
 				true ->
-				    {proceed, Response, Flags};
+				    {proceed, Request, Response, Flags};
 				false ->
 				    authorization_required(DirOpts)
 			    end;

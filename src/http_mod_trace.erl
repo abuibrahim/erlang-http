@@ -17,5 +17,5 @@ handle(_Socket, #http_request{method = 'TRACE'} = Request, _Response, _) ->
     Headers = [{'Content-Type', "message/http"},
 	       {'Content-Length', iolist_size(Body)}],
     #http_response{headers = Headers, body = Body};
-handle(_Socket, _Request, Response, Flags) ->
-    {proceed, Response, Flags}.
+handle(_Socket, Request, Response, Flags) ->
+    {proceed, Request, Response, Flags}.

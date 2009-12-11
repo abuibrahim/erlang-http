@@ -13,7 +13,7 @@
 init() ->
     ok.
 
-handle(Socket, Request, Response, Flags) ->
+handle(Socket, Request, undefined, Flags) ->
     Path = http_lib:uri_to_path(Request#http_request.uri),
     {ok, Scripts} = application:get_env(scripts),
     case match(Request, Path, Scripts) of
@@ -23,10 +23,12 @@ handle(Socket, Request, Response, Flags) ->
 		exit:Reason -> {error, Reason}
 	    end;
 	nomatch ->
-	    {proceed, Response, Flags};
+	    {proceed, Request, undefined, Flags};
 	{error, Reason} ->
 	    {error, Reason}
-    end.
+    end;
+handle(_Socket, Request, Response, Flags) ->
+    {proceed, Request, Response, Flags}.
 
 match(_Request, _Path, []) ->
     nomatch;

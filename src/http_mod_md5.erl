@@ -12,12 +12,12 @@
 init() ->
     ok.
 
-handle(_Socket, _Request, undefined, Flags) ->
-    {proceed, undefined, Flags};
-handle(_Socket, _Request, Response, Flags)
+handle(_Socket, Request, undefined, Flags) ->
+    {proceed, Request, undefined, Flags};
+handle(_Socket, Request, Response, Flags)
   when is_record(Response, http_response) ->
     #http_response{body = Body, headers = Headers} = Response,
     Digest = base64:encode_to_string(erlang:md5(Body)),
     Headers1 = [{'Content-MD5', Digest} | Headers],
     Response1 = Response#http_response{headers = Headers1},
-    {proceed, Response1, Flags}.
+    {proceed, Request, Response1, Flags}.

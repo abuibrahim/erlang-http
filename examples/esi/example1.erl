@@ -8,7 +8,7 @@ print1(_Socket, Request, Params) ->
     Body = io_lib:format("~p~nParams:~p", [Request, Params]),
     Headers = [{'Content-Type', "text/plain"},
 	       {'Content-Length', iolist_size(Body)}],
-    {proceed, #http_response{headers = Headers, body = Body}, []}.
+    {proceed, Request, #http_response{headers = Headers, body = Body}, []}.
 
 print2(_Socket, Request, Params) ->
     Body = io_lib:format("~p~nParams: ~p",[Request, Params]),

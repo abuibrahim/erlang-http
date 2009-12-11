@@ -30,16 +30,16 @@ handle(Socket, #http_request{method = 'GET'} = Request, undefined, Flags) ->
 		{ok, Ranges} ->
 		    send(Socket, Path, FileInfo, Ranges);
 		{error, _Reason} ->
-		    {proceed, undefined, Flags}
+		    {proceed, Request, undefined, Flags}
 	    end;
 	false ->
-	    {proceed, undefined, Flags}
+	    {proceed, Request, undefined, Flags}
     end;
-handle(_Socket, _Request, undefined, Flags) ->
-    {proceed, undefined, Flags};
-handle(_Socket, _Request, Response, Flags)
+handle(_Socket, Request, undefined, Flags) ->
+    {proceed, Request, undefined, Flags};
+handle(_Socket, Request, Response, Flags)
   when is_record(Response, http_response) ->
-    {proceed, accept_ranges(Response), Flags}.
+    {proceed, Request, accept_ranges(Response), Flags}.
 
 accept_ranges(Response) when is_record(Response, http_response) ->
     Headers = [{'Accept-Ranges', "bytes"} | Response#http_response.headers],
