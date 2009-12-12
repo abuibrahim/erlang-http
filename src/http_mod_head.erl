@@ -1,5 +1,5 @@
 %% @author Ruslan Babayev <ruslan@babayev.com>
-%% @copyright 2009, Ruslan Babayev
+%% @copyright 2009 Ruslan Babayev
 %% @doc This module handles `HEAD' requests.
 %%      Uses `file_info' flag.
 
@@ -11,9 +11,15 @@
 -include("http.hrl").
 -include_lib("kernel/include/file.hrl").
 
+%% @doc Initializes the module.
+%% @spec init() -> ok | {error, Error}
 init() ->
     ok.
 
+%% @doc Handles the Request, Response and Flags from previous modules.
+%% @spec handle(Socket, Request, Response, Flags) ->
+%%       #http_response{} | already_sent | {error, Error} |
+%%       {proceed, Request, Response, Flags}
 handle(_Socket, #http_request{method = 'HEAD'} = Request, undefined, Flags) ->
     FI = proplists:get_value(file_info, Flags),
     Size = FI#file_info.size,

@@ -1,5 +1,5 @@
 %% @author Ruslan Babayev <ruslan@babayev.com>
-%% @copyright 2009, Ruslan Babayev
+%% @copyright 2009 Ruslan Babayev
 %% @doc This module maps the request URI to a path.
 %%      Uses `aliases', `docroot' and `indices' environment variables.
 %%      Sets `path' flag.
@@ -12,9 +12,15 @@
 -include("http.hrl").
 -include_lib("kernel/include/file.hrl").
 
+%% @doc Initializes the module.
+%% @spec init() -> ok | {error, Error}
 init() ->
     ok.
 
+%% @doc Handles the Request, Response and Flags from previous modules.
+%% @spec handle(Socket, Request, Response, Flags) ->
+%%       #http_response{} | already_sent | {error, Error} |
+%%       {proceed, Request, Response, Flags}
 handle(_Socket, Request, Response, Flags) ->
     ReqPath = http_lib:uri_to_path(Request#http_request.uri),
     DecodedPath = http_lib:url_decode(ReqPath),

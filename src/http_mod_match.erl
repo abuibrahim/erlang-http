@@ -1,6 +1,6 @@
 %% @author Ruslan Babayev <ruslan@babayev.com>
-%% @copyright 2009, Ruslan Babayev
-%% @doc This module handles requests that include `If-Match' and
+%% @copyright 2009 Ruslan Babayev
+%% @doc This module handles requests that include `If-Match' or
 %%      `If-None-Match' headers.
 %%      Uses `file_info' flag.
 
@@ -11,9 +11,15 @@
 
 -include("http.hrl").
 
+%% @doc Initializes the module.
+%% @spec init() -> ok | {error, Error}
 init() ->
     ok.
 
+%% @doc Handles the Request, Response and Flags from previous modules.
+%% @spec handle(Socket, Request, Response, Flags) ->
+%%       #http_response{} | already_sent | {error, Error} |
+%%       {proceed, Request, Response, Flags}
 handle(_Socket, Request, undefined, Flags) ->
     #http_request{method = Method, headers = Headers} = Request,
     FileInfo = proplists:get_value(file_info, Flags),

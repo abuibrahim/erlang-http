@@ -1,6 +1,6 @@
-%%% @author Ruslan Babayev <ruslan@babayev.com>
-%%% @copyright 2009, Ruslan Babayev
-%%% @doc HTTP Server.
+%% @author Ruslan Babayev <ruslan@babayev.com>
+%% @copyright 2009 Ruslan Babayev
+%% @doc HTTP Server.
 
 -module(http_server).
 -author('ruslan@babayev.com').
@@ -95,7 +95,7 @@ recv_headers(State) ->
 
 handle_request(State) ->
     #state{modules = Modules, socket = Socket, request = Request} = State,
-    case traverse(Socket, Request, Modules) of
+    case traverse(Socket, Request, undefined, [], Modules) of
 	#http_response{} = Response ->
 	    handle_response(State#state{response = Response});
 	already_sent ->
@@ -111,23 +111,15 @@ handle_request(State) ->
 	    handle_response(State#state{response = NotImplemented})
     end.
 
-traverse(Socket, Request, Modules) ->
-    traverse(Socket, Request, undefined, [], next, Modules).
-
-traverse(_Socket, _Request, Response, _Flags, _Next, []) ->
+traverse(_Socket, _Request, Response, _Flags, []) ->
     Response;
-traverse(Socket, Request, Response, Flags, Next, [Module|Rest])
-  when Next == Module; Next == next ->
+traverse(Socket, Request, Response, Flags, [Module|Rest]) ->
     case Module:handle(Socket, Request, Response, Flags) of
 	{proceed, Request1, Response1, Flags1} ->
-	    traverse(Socket, Request1, Response1, Flags1, next, Rest);
-	{skip_to, Next1, Request1, Response1, Flags1} ->
-	    traverse(Socket, Request1, Response1, Flags1, Next1, Rest);
+	    traverse(Socket, Request1, Response1, Flags1, Rest);
 	Else ->
 	    Else
-    end;
-traverse(Socket, Request, Response, Flags, Next, [_Module|Rest]) ->
-    traverse(Socket, Request, Response, Flags, Next, Rest).
+    end.
 
 handle_response(#state{socket = Socket, response = Response} = State) ->
     case http_lib:send(Socket, http_lib:encode(Response)) of

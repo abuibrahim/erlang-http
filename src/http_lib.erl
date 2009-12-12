@@ -1,5 +1,5 @@
 %% @author Ruslan Babayev <ruslan@babayev.com>
-%% @copyright 2009, Ruslan Babayev
+%% @copyright 2009 Ruslan Babayev
 %% @doc HTTP Encoding and Utility Library.
 
 -module(http_lib).

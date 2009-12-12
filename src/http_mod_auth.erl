@@ -1,5 +1,5 @@
 %% @author Ruslan Babayev <ruslan@babayev.com>
-%% @copyright 2009, Ruslan Babayev
+%% @copyright 2009 Ruslan Babayev
 %% @doc This module provides basic user authentication using text files.
 %%      Uses `path' flag and `directories' environment variable.
 
@@ -13,9 +13,15 @@
 -record(http_user, {name, password}).
 -record(http_group, {name, users}).
 
+%% @doc Initializes the module.
+%% @spec init() -> ok | {error, Error}
 init() ->
     ok.
 
+%% @doc Handles the Request, Response and Flags from previous modules.
+%% @spec handle(Socket, Request, Response, Flags) ->
+%%       #http_response{} | already_sent | {error, Error} |
+%%       {proceed, Request, Response, Flags}
 handle(Socket, Request, Response, Flags) ->
     Path = proplists:get_value(path, Flags),
     {ok, Directories} = application:get_env(directories),

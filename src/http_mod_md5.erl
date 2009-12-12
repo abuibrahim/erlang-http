@@ -1,5 +1,5 @@
 %% @author Ruslan Babayev <ruslan@babayev.com>
-%% @copyright 2009, Ruslan Babayev
+%% @copyright 2009 Ruslan Babayev
 %% @doc This module implements Message Integrity Checking (MIC).
 
 -module(http_mod_md5).
@@ -9,9 +9,15 @@
 
 -include("http.hrl").
 
+%% @doc Initializes the module.
+%% @spec init() -> ok | {error, Error}
 init() ->
     ok.
 
+%% @doc Handles the Request, Response and Flags from previous modules.
+%% @spec handle(Socket, Request, Response, Flags) ->
+%%       #http_response{} | already_sent | {error, Error} |
+%%       {proceed, Request, Response, Flags}
 handle(_Socket, Request, undefined, Flags) ->
     {proceed, Request, undefined, Flags};
 handle(_Socket, Request, Response, Flags)

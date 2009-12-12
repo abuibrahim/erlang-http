@@ -63,9 +63,6 @@ The handler must return one of the following:
   <dd>Pass the `Request', `Response' and the `Flags' to the next module
       in the `modules' list. If this was the last module, send `Response'
       to the client.</dd>
-  <dt>`{skip_to, Module, Request, Response, Flags}'</dt>
-  <dd>Skip to the specified `Module'. If `Module' is not found, send the
-      `Response' to the client.</dd>
   <dt>`#http_response{}'</dt>
   <dd>Modules traversal is complete. Send the response to the client.</dd>
   <dt>`already_sent'</dt>

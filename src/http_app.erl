@@ -1,6 +1,7 @@
 %% @author Ruslan Babayev <ruslan@babayev.com>
-%% @copyright 2009, Ruslan Babayev
+%% @copyright 2009 Ruslan Babayev
 %% @doc HTTP Application.
+
 -module(http_app).
 -author('ruslan@babayev.com').
 

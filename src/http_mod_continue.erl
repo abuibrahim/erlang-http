@@ -1,5 +1,5 @@
 %% @author Ruslan Babayev <ruslan@babayev.com>
-%% @copyright 2009, Ruslan Babayev
+%% @copyright 2009 Ruslan Babayev
 %% @doc This module handles clients that `Expect' `100-continue' status
 %%      before they send the request body.
 %% @reference <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html#sec8.2.3">Use of the 100 (Continue) Status</a>
@@ -11,9 +11,15 @@
 
 -include("http.hrl").
 
+%% @doc Initializes the module.
+%% @spec init() -> ok | {error, Error}
 init() ->
     ok.
 
+%% @doc Handles the Request, Response and Flags from previous modules.
+%% @spec handle(Socket, Request, Response, Flags) ->
+%%       #http_response{} | already_sent | {error, Error} |
+%%       {proceed, Request, Response, Flags}
 handle(Socket, #http_request{method = M} = Request, Response, Flags)
   when M == 'POST'; M == 'PUT'; M == 'PROPFIND'; M == 'OPTIONS' ->
     case proplists:get_value("Expect", Request#http_request.headers) of

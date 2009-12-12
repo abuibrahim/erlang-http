@@ -1,7 +1,8 @@
 %% @author Ruslan Babayev <ruslan@babayev.com>
-%% @copyright 2009, Ruslan Babayev
+%% @copyright 2009 Ruslan Babayev
 %% @doc This module handles Flex remoting requests.
-%%      Uses `flex_services' and `flex_auth' environment variables.
+%%      Uses `flex_services', `flex_auth' and `flex_destinations'
+%%      environment variables.
 
 -module(http_mod_amf).
 -author('ruslan@babayev.com').
@@ -11,6 +12,8 @@
 -include("http.hrl").
 -include("amf.hrl").
 
+%% @doc Initializes the module.
+%% @spec init() -> ok | {error, Error}
 init() ->
     case application:start(amf) of
 	ok ->
@@ -21,6 +24,10 @@ init() ->
 	    {error, amf_not_found}
     end.
 
+%% @doc Handles the Request, Response and Flags from previous modules.
+%% @spec handle(Socket, Request, Response, Flags) ->
+%%       #http_response{} | already_sent | {error, Error} |
+%%       {proceed, Request, Response, Flags}
 handle(_Socket, #http_request{method = 'POST'} = Request, Response, Flags) ->
     case proplists:get_value('Content-Type', Request#http_request.headers) of
 	"application/x-amf" ->

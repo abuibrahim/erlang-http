@@ -1,6 +1,7 @@
-%%% @author Ruslan Babayev <ruslan@babayev.com>
-%%% @copyright 2009, Ruslan Babayev
-%%% @doc HTTP Client.
+%% @author Ruslan Babayev <ruslan@babayev.com>
+%% @copyright 2009 Ruslan Babayev
+%% @doc HTTP Client.
+
 -module(http_client).
 -author('ruslan@babayev.com').
 
@@ -50,10 +51,6 @@ send(Request) ->
 send(Request, Timeout) ->
     gen_server:call(?SERVER, {send, Request}, Timeout).
 
-%%%===================================================================
-%%% gen_server callbacks
-%%%===================================================================
-
 %% @private
 %% @doc Initializes the server.
 %% @spec init(Args) -> {ok, State} |
@@ -93,12 +90,7 @@ handle_info(_Info, State) ->
     {noreply, State}.
 
 %% @private
-%% @doc
-%% This function is called by a gen_server when it is about to
-%% terminate. It should be the opposite of Module:init/1 and do any
-%% necessary cleaning up. When it returns, the gen_server terminates
-%% with Reason. The return value is ignored.
-%%
+%% @doc Terminates the server.
 %% @spec terminate(Reason, State) -> void()
 terminate(_Reason, _State) ->
     ok.
@@ -108,10 +100,6 @@ terminate(_Reason, _State) ->
 %% @spec code_change(OldVsn, State, Extra) -> {ok, NewState}
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
-
-%%%===================================================================
-%%% Internal functions
-%%%===================================================================
 
 %% @private
 %% @doc Worker process.

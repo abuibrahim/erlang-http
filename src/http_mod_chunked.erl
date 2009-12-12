@@ -1,5 +1,5 @@
 %% @author Ruslan Babayev <ruslan@babayev.com>
-%% @copyright 2009, Ruslan Babayev
+%% @copyright 2009 Ruslan Babayev
 %% @doc This module handles Chunked Transfer Coding.
 %% @reference <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.6.1">Chunked Transfer Coding</a>
 
@@ -10,9 +10,15 @@
 
 -include("http.hrl").
 
+%% @doc Initializes the module.
+%% @spec init() -> ok | {error, Error}
 init() ->
     ok.
 
+%% @doc Handles the Request, Response and Flags from previous modules.
+%% @spec handle(Socket, Request, Response, Flags) ->
+%%       #http_response{} | already_sent | {error, Error} |
+%%       {proceed, Request, Response, Flags}
 handle(Socket, #http_request{method = M} = Request, Response, Flags)
   when M == 'POST'; M == 'PUT'; M == 'PROPFIND'; M == 'OPTIONS' ->
     Headers = Request#http_request.headers,
