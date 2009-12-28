@@ -13,12 +13,10 @@
 %% Supervisor callbacks
 -export([init/1]).
 
--define(SERVER, ?MODULE).
-
 %% @doc Starts the supervisor.
 %% @spec start_link() -> {ok, Pid} | ignore | {error, Error}
 start_link() ->
-    supervisor:start_link({local, ?SERVER}, ?MODULE, []).
+    supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 %% @private
 %% @doc Initializes the supervisor.
