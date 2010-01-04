@@ -16,7 +16,6 @@
 %%                                      {error, Reason}
 %%      StartType = normal | {takeover, Node} | {failover, Node}
 %%      StartArgs = term()
-%% @end
 start(_StartType, _StartArgs) ->
     http_sup:start_link().
 
