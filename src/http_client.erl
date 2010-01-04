@@ -91,7 +91,7 @@ handle_info(_Info, State) ->
 
 %% @private
 %% @doc Terminates the server.
-%% @spec terminate(Reason, State) -> void()
+%% @spec terminate(Reason, State) -> any()
 terminate(_Reason, _State) ->
     ok.
 

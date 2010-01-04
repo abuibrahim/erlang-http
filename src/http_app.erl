@@ -20,6 +20,6 @@ start(_StartType, _StartArgs) ->
     http_sup:start_link().
 
 %% @doc Stops the application.
-%% @spec stop(State) -> void()
+%% @spec stop(State) -> any()
 stop(_State) ->
     ok.

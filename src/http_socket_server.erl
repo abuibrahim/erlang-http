@@ -105,7 +105,7 @@ handle_info(_Info, State) ->
 
 %% @private
 %% @doc Terminates the server.
-%% @spec terminate(Reason, State) -> void()
+%% @spec terminate(Reason, State) -> any()
 terminate(_Reason, #state{listen = Socket}) ->
     http_lib:close(Socket).
 
