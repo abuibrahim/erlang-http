@@ -97,8 +97,8 @@ handle_amf_message(#amf_message{response = Response, body = Body}) ->
 -define(ERROR_MESSAGE,       <<"flex.messaging.messages.ErrorMessage">>).
 -define(ASYNC_MESSAGE,       <<"flex.messaging.messages.AsyncMessage">>).
 
-handle_amf_message_body({avmplus, Msg}) ->
-    handle_amf_message_body(Msg);
+handle_amf_message_body([{avmplus, Msg}]) ->
+    handle_amf_message_body([Msg]);
 handle_amf_message_body([{object, ?COMMAND_MESSAGE, Members} = Msg]) ->
     case proplists:get_value(operation, Members) of
 	?CLIENT_PING ->
