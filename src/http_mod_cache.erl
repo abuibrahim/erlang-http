@@ -1,8 +1,6 @@
 %% @author Ruslan Babayev <ruslan@babayev.com>
 %% @copyright 2009 Ruslan Babayev
 %% @doc This module implements ETS based cache.
-%%      Uses `path' and `file_info' flags as well as `max_size_cached_file',
-%%      `max_cache_size' and `max_cache_memory' environment variables.
 
 -module(http_mod_cache).
 -author('ruslan@babayev.com').
@@ -13,15 +11,20 @@
 -include_lib("kernel/include/file.hrl").
 
 %% @doc Initializes the module.
-%% @spec init() -> ok | {error, Error}
+%% @spec init() -> ok | {error, Reason}
 init() ->
     ets:new(http_cache, [set, public, named_table]),
     ok.
 
 %% @doc Handles the Request, Response and Flags from previous modules.
-%% @spec handle(Socket, Request, Response, Flags) ->
-%%       #http_response{} | already_sent | {error, Error} |
-%%       {proceed, Request, Response, Flags}
+%%      Uses `path' and `file_info' flags as well as `max_size_cached_file',
+%%      `max_cache_size' and `max_cache_memory' environment variables.
+%% @spec handle(Socket, Request, Response, Flags) -> Result
+%%       Request = #http_request{}
+%%       Response = #http_response{} | undefined
+%%       Flags = list()
+%%       Result = #http_response{} | already_sent | {error, Reason} | Proceed
+%%       Proceed = {proceed, Request, Response, Flags}
 handle(_Socket, #http_request{method = 'GET'} = Request, undefined, Flags) ->
     {ok, MaxSize} = application:get_env(max_size_cached_file),
     case proplists:get_value(file_info, Flags) of

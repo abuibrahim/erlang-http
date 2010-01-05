@@ -1,7 +1,6 @@
 %% @author Ruslan Babayev <ruslan@babayev.com>
 %% @copyright 2009 Ruslan Babayev
 %% @doc This module implementes Erlang Server Interface (ESI).
-%%      Uses `scripts' environment variable.
 
 -module(http_mod_esi).
 -author('ruslan@babayev.com').
@@ -11,14 +10,18 @@
 -include("http.hrl").
 
 %% @doc Initializes the module.
-%% @spec init() -> ok | {error, Error}
+%% @spec init() -> ok | {error, Reason}
 init() ->
     ok.
 
 %% @doc Handles the Request, Response and Flags from previous modules.
-%% @spec handle(Socket, Request, Response, Flags) ->
-%%       #http_response{} | already_sent | {error, Error} |
-%%       {proceed, Request, Response, Flags}
+%%      Uses `scripts' environment variable.
+%% @spec handle(Socket, Request, Response, Flags) -> Result
+%%       Request = #http_request{}
+%%       Response = #http_response{} | undefined
+%%       Flags = list()
+%%       Result = #http_response{} | already_sent | {error, Reason} | Proceed
+%%       Proceed = {proceed, Request, Response, Flags}
 handle(Socket, Request, undefined, Flags) ->
     Path = http_lib:uri_to_path(Request#http_request.uri),
     {ok, Scripts} = application:get_env(scripts),

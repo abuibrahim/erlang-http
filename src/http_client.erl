@@ -21,7 +21,7 @@
 -record(state, {}).
 
 %% @doc Starts the server.
-%% @spec start_link() -> {ok, Pid} | ignore | {error, Error}
+%% @spec start_link() -> {ok, Pid} | ignore | {error, Reason}
 start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
@@ -31,7 +31,7 @@ request(URI) ->
     request(URI, infinity).
 
 %% @doc Parses the URI and sends the request to the server.
-%% @spec request(URI::string(), Timeout::integer()) -> ok | {error, Error}
+%% @spec request(URI::string(), Timeout::integer()) -> ok | {error, Reason}
 request(URI, Timeout) ->
     try http_lib:list_to_absoluteURI(URI) of
 	AbsoluteURI ->
@@ -41,13 +41,13 @@ request(URI, Timeout) ->
 	    {error, Reason}
     end.
 
-%% @spec send(#http_request{}) -> ok | {error, Error}
+%% @spec send(#http_request{}) -> ok | {error, Reason}
 %% @equiv send(Request, infinity)
 send(Request) ->
     send(Request, infinity).
 
 %% @doc Sends the HTTP request to the server.
-%% @spec send(#http_request{}, Timeout::integer()) -> ok | {error, Error}
+%% @spec send(#http_request{}, Timeout::integer()) -> ok | {error, Reason}
 send(Request, Timeout) ->
     gen_server:call(?SERVER, {send, Request}, Timeout).
 

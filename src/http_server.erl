@@ -19,7 +19,7 @@
 		timeout}).
 
 %% @doc Starts the server.
-%% @spec start_link() -> {ok, Pid} | ignore | {error, Error}
+%% @spec start_link() -> {ok, Pid} | ignore | {error, Reason}
 start_link() ->
     {ok, Modules} = application:get_env(modules),
     {ok, Timeout} = application:get_env(idle_timeout),
@@ -35,7 +35,7 @@ start_link() ->
 
 %% @private
 %% @doc Initializes modules.
-%% @spec init(Modules::list()) -> ok | {error, Error}
+%% @spec init(Modules::list()) -> ok | {error, Reason}
 init([]) ->
     ok;
 init([Module | Rest]) ->

@@ -10,14 +10,17 @@
 -include("http.hrl").
 
 %% @doc Initializes the module.
-%% @spec init() -> ok | {error, Error}
+%% @spec init() -> ok | {error, Reason}
 init() ->
     ok.
 
 %% @doc Handles the Request, Response and Flags from previous modules.
-%% @spec handle(Socket, Request, Response, Flags) ->
-%%       #http_response{} | already_sent | {error, Error} |
-%%       {proceed, Request, Response, Flags}
+%% @spec handle(Socket, Request, Response, Flags) -> Result
+%%       Request = #http_request{}
+%%       Response = #http_response{} | undefined
+%%       Flags = list()
+%%       Result = #http_response{} | already_sent | {error, Reason} | Proceed
+%%       Proceed = {proceed, Request, Response, Flags}
 handle(_Socket, Request, undefined, Flags) ->
     {proceed, Request, undefined, Flags};
 handle(_Socket, Request, Response, Flags)

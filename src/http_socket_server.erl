@@ -22,7 +22,7 @@
 -record(state, {transport, listen, acceptor, loop}).
 
 %% @doc Starts the server registered as Name with socket handler Loop.
-%% @spec start_link(atom(), function()) -> {ok, Pid} | ignore | {error, Error}
+%% @spec start_link(atom(), function()) -> {ok, Pid} | ignore | {error, Reason}
 start_link(Name, Loop) ->
     gen_server:start_link({local, Name}, ?MODULE, Loop, []).
 
@@ -72,8 +72,7 @@ init(Loop) ->
 %%                  {stop, Reason, Reply, State} |
 %%                  {stop, Reason, State}
 handle_call(_Request, _From, State) ->
-    Reply = ok,
-    {reply, Reply, State}.
+    {noreply, State}.
 
 %% @private
 %% @doc Handles cast messages.

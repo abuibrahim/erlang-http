@@ -1,7 +1,6 @@
 %% @author Ruslan Babayev <ruslan@babayev.com>
 %% @copyright 2009 Ruslan Babayev
-%% @doc This module handles `GET' requests that include `Range' header.
-%%      Uses `file_info' flag.
+%% @doc This module handles `GET' requests containing `Range' header.
 
 -module(http_mod_range).
 -author('ruslan@babayev.com').
@@ -15,14 +14,18 @@
 -define(READ_SIZE, 8*1024).
 
 %% @doc Initializes the module.
-%% @spec init() -> ok | {error, Error}
+%% @spec init() -> ok | {error, Reason}
 init() ->
     ok.
 
 %% @doc Handles the Request, Response and Flags from previous modules.
-%% @spec handle(Socket, Request, Response, Flags) ->
-%%       #http_response{} | already_sent | {error, Error} |
-%%       {proceed, Request, Response, Flags}
+%%      Uses `file_info' flag.
+%% @spec handle(Socket, Request, Response, Flags) -> Result
+%%       Request = #http_request{}
+%%       Response = #http_response{} | undefined
+%%       Flags = list()
+%%       Result = #http_response{} | already_sent | {error, Reason} | Proceed
+%%       Proceed = {proceed, Request, Response, Flags}
 handle(Socket, #http_request{method = 'GET'} = Request, undefined, Flags) ->
     Headers = Request#http_request.headers,
     Path = proplists:get_value(path, Flags),

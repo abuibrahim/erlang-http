@@ -1,8 +1,6 @@
 %% @author Ruslan Babayev <ruslan@babayev.com>
 %% @copyright 2009 Ruslan Babayev
-%% @doc This module handles `GET' requests to regular files.
-%%      Uses `path' and `file_info' flags and `mime_types'
-%%      environment variable.
+%% @doc This module handles `GET' requests for regular files.
 
 -module(http_mod_regular).
 -author('ruslan@babayev.com').
@@ -13,7 +11,7 @@
 -include_lib("kernel/include/file.hrl").
 
 %% @doc Initializes the module.
-%% @spec init() -> ok | {error, Error}
+%% @spec init() -> ok | {error, Reason}
 init() ->
     {ok, MimeTypesConf} = application:get_env(mime_types),
     {ok, MimeTypes} = file:consult(http_lib:dir(MimeTypesConf)),
@@ -22,9 +20,14 @@ init() ->
     ok.
 
 %% @doc Handles the Request, Response and Flags from previous modules.
-%% @spec handle(Socket, Request, Response, Flags) ->
-%%       #http_response{} | already_sent | {error, Error} |
-%%       {proceed, Request, Response, Flags}
+%%      Uses `path' and `file_info' flags and `mime_types'
+%%      environment variable.
+%% @spec handle(Socket, Request, Response, Flags) -> Result
+%%       Request = #http_request{}
+%%       Response = #http_response{} | undefined
+%%       Flags = list()
+%%       Result = #http_response{} | already_sent | {error, Reason} | Proceed
+%%       Proceed = {proceed, Request, Response, Flags}
 handle(Socket, #http_request{method = 'GET'} = Request, undefined, Flags) ->
     case proplists:get_value(file_info, Flags) of
 	FI when FI#file_info.type == regular ->
