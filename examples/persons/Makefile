@@ -24,5 +24,5 @@ persons.swf: persons.as Person.as
 clean:
 	rm -f $(BEAMS) $(SWFS)
 
-run:
+run: all
 	$(ERL) -pa ../../ebin ../../deps/*/ebin -s http -config persons

@@ -15,5 +15,5 @@ all: $(BEAMS)
 clean:
 	rm -f $(BEAMS)
 
-run: $(BEAMS)
+run: all
 	@$(ERL) -pa ../../ebin ../../deps/*/ebin -s http -config esi
