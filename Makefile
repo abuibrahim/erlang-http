@@ -6,7 +6,6 @@ all: compile
 
 compile:
 	@$(ERL) -make
-	@(for dir in deps/*; do cd $$dir; $(MAKE); done)
 
 clean:
 	@echo "removing:"
