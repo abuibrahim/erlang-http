@@ -1,6 +1,6 @@
 ERL=erl
 ERLC=erlc
-ERLCFLAGS+=-W +debug_info -I ../../include -I ../../deps/erlang-amf/include
+ERLCFLAGS+=-W +debug_info -I ../../include -I ../../deps/amf/include
 ERLS=stock.erl mochijson2.erl
 MXMLC=mxmlc
 MXMLFLAGS=-services "services-config.xml"
