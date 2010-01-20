@@ -130,8 +130,8 @@ handle_response(#state{socket = Socket, response = Response} = State) ->
 	    exit(Reason)
     end.
 
-handle_connection(State) when State#state.response == undefined ->
-    #state{socket = Socket, request = Request} = State,
+handle_connection(#state{socket = Socket, request = Request} = State)
+  when State#state.response == undefined ->
     case http_lib:is_persistent(Request) of
 	true ->
 	    recv_request(State#state{request = undefined});
@@ -139,10 +139,8 @@ handle_connection(State) when State#state.response == undefined ->
 	    http_lib:close(Socket),
 	    exit(normal)
     end;
-handle_connection(State) ->
-    #state{socket = Socket, response = Response} = State,
-    #http_response{headers = Headers} = Response,
-    case proplists:get_value('Connection', Headers) of
+handle_connection(#state{socket = Socket, response = Response} = State) ->
+    case proplists:get_value('Connection', Response#http_response.headers) of
 	"close" ->
 	    http_lib:close(Socket),
 	    exit(normal);
