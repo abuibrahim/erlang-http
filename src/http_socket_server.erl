@@ -24,7 +24,7 @@
 %% @doc Starts the server registered as Name with socket handler Loop.
 %% @spec start_link(atom(), function()) -> {ok, Pid} | ignore | {error, Reason}
 start_link(Name, Loop) ->
-    gen_server:start_link({local, Name}, ?MODULE, Loop, []).
+    gen_server:start_link({local, Name}, ?MODULE, [Loop], []).
 
 %% @private
 %% @doc Initializes the server.
@@ -32,7 +32,7 @@ start_link(Name, Loop) ->
 %%                     {ok, State, Timeout} |
 %%                     ignore |
 %%                     {stop, Reason}
-init(Loop) ->
+init([Loop]) ->
     process_flag(trap_exit, true),
     {ok, Address} = application:get_env(ip),
     {ok, Port} = application:get_env(port),
@@ -64,13 +64,12 @@ init(Loop) ->
 
 %% @private
 %% @doc Handles call messages.
-%% @spec handle_call(Request, From, State) ->
-%%                  {reply, Reply, State} |
-%%                  {reply, Reply, State, Timeout} |
-%%                  {noreply, State} |
-%%                  {noreply, State, Timeout} |
-%%                  {stop, Reason, Reply, State} |
-%%                  {stop, Reason, State}
+%% @spec handle_call(Request, From, State) -> {reply, Reply, State} |
+%%                                            {reply, Reply, State, Timeout} |
+%%                                            {noreply, State} |
+%%                                            {noreply, State, Timeout} |
+%%                                            {stop, Reason, Reply, State} |
+%%                                            {stop, Reason, State}
 handle_call(_Request, _From, State) ->
     {noreply, State}.
 
@@ -103,7 +102,7 @@ handle_info(_Info, State) ->
     {noreply, State}.
 
 %% @private
-%% @doc Terminates the server.
+%% @doc Performs cleanup on termination.
 %% @spec terminate(Reason, State) -> any()
 terminate(_Reason, #state{listen = Socket}) ->
     http_lib:close(Socket).
@@ -123,6 +122,7 @@ new_acceptor(#state{listen = Listen, loop = Loop} = State) ->
 
 %% @private
 %% @doc Main acceptor loop.
+%% @spec acceptor(pid(), Listen, function()) -> any()
 acceptor(Server, Listen, Loop) ->
     case http_lib:accept(Listen) of
 	{ok, Socket} ->

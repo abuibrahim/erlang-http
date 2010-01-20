@@ -11,12 +11,10 @@
 -export([start/2, stop/1]).
 
 %% @doc Starts the application.
-%% @spec start(StartType, StartArgs) -> {ok, Pid} |
-%%                                      {ok, Pid, State} |
-%%                                      {error, Reason}
-%%      StartType = normal | {takeover, Node} | {failover, Node}
-%%      StartArgs = term()
-start(_StartType, _StartArgs) ->
+%% @spec start(Type, Args) -> {ok, Pid} | {ok, Pid, State} | {error, Reason}
+%%      Type = normal | {takeover, Node} | {failover, Node}
+%%      Args = term()
+start(_Type, _Args) ->
     http_sup:start_link().
 
 %% @doc Stops the application.

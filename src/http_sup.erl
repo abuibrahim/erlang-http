@@ -20,9 +20,7 @@ start_link() ->
 
 %% @private
 %% @doc Initializes the supervisor.
-%% @spec init(Args) -> {ok, {SupFlags, [ChildSpec]}} |
-%%                     ignore |
-%%                     {error, Reason}
+%% @spec init(Args) -> {ok, {SupFlags, ChildSpecs}} | ignore | {error, Reason}
 init([]) ->
     Client = {http_client, {http_client, start_link, []},
 	      permanent, 2000, worker, [http_client]},
