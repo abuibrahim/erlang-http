@@ -24,9 +24,12 @@ start_link() ->
     {ok, Modules} = application:get_env(modules),
     {ok, Timeout} = application:get_env(idle_timeout),
     State = #state{modules = Modules, timeout = Timeout},
-    Loop = fun(Socket) -> recv_request(State#state{socket = Socket}) end,
-    case init(Modules) of
-	ok ->
+    case init(Modules, []) of
+	{ok, ModStates} ->
+	    Loop = fun(Socket) ->
+			   recv_request(State#state{socket = Socket,
+						    modules = ModStates})
+		   end,
 	    http_socket_server:start_link(?MODULE, Loop);
 	{error, Reason} ->
 	    error_logger:error_report({?MODULE, Reason}),
@@ -36,14 +39,14 @@ start_link() ->
 %% @private
 %% @doc Initializes modules.
 %% @spec init(Modules::list()) -> ok | {error, Reason}
-init([]) ->
-    ok;
-init([Module | Rest]) ->
+init([], ModStates) ->
+    {ok, lists:reverse(ModStates)};
+init([Module | Rest], ModStates) ->
     case code:ensure_loaded(Module) of
 	{module, Module} ->
 	    case Module:init() of
-		ok ->
-		    init(Rest);
+		{ok, ModState} ->
+		    init(Rest, [{Module, ModState} | ModStates]);
 		{error, Reason} ->
 		    {error, {Module, Reason}}
 	    end;
@@ -95,30 +98,39 @@ recv_headers(State) ->
 
 handle_request(State) ->
     #state{modules = Modules, socket = Socket, request = Request} = State,
-    case traverse(Socket, Request, undefined, [], Modules) of
+    {Response, NewModules} =
+	traverse(Socket, Request, undefined, [], Modules, Modules),
+    State1 = State#state{modules = NewModules},
+    case Response of
 	#http_response{} = Response ->
-	    handle_response(State#state{response = Response});
+	    handle_response(State1#state{response = Response});
 	already_sent ->
-	    handle_connection(State#state{response = undefined});
+	    handle_connection(State1#state{response = undefined});
 	{error, closed} ->
 	    exit(normal);
 	{error, Reason} ->
 	    error_logger:error_report({?MODULE, Reason}),
 	    InternalServerError = http_lib:response(500),
-	    handle_response(State#state{response = InternalServerError});
+	    handle_response(State1#state{response = InternalServerError});
 	undefined ->
 	    NotImplemented = http_lib:response(501),
-	    handle_response(State#state{response = NotImplemented})
+	    handle_response(State1#state{response = NotImplemented})
     end.
 
-traverse(_Socket, _Request, Response, _Flags, []) ->
-    Response;
-traverse(Socket, Request, Response, Flags, [Module|Rest]) ->
-    case Module:handle(Socket, Request, Response, Flags) of
-	{proceed, Request1, Response1, Flags1} ->
-	    traverse(Socket, Request1, Response1, Flags1, Rest);
-	Else ->
-	    Else
+traverse(_Socket, _Request, Response, _Flags, [], NewModules) ->
+    {Response, NewModules};
+traverse(Socket, Request, Response, Flags, [{Module, State} | Rest],
+	 NewModules) ->
+    case Module:handle(Socket, Request, Response, Flags, State) of
+	{{proceed, Request1, Response1, Flags1}, NewModState} ->
+	    traverse(Socket, Request1, Response1, Flags1, Rest,
+		     lists:keyreplace(Module, 1, NewModules,
+				      {Module, NewModState}));
+	{Result, NewModState} ->
+	    {Result,
+	     lists:keyreplace(Module, 1, NewModules, {Module, NewModState})};
+	Other ->
+	    exit({unexpected_value, Module, Other})
     end.
 
 handle_response(#state{socket = Socket, response = Response} = State) ->

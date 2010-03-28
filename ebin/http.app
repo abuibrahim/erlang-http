@@ -31,7 +31,7 @@
 	     http_mod_deflate,
 	     http_mod_md5]},
   {registered, [http_sup, http_client, http_server]},
-  {applications, [kernel, stdlib, crypto, ssl, amf]},
+  {applications, [kernel, stdlib, crypto, ssl]},
   {mod, {http_app, []}},
   {env, [{port, 8080},
 	 {ip, {0,0,0,0}},

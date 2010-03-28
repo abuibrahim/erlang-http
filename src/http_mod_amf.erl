@@ -5,19 +5,19 @@
 -module(http_mod_amf).
 -author('ruslan@babayev.com').
 
--export([init/0, handle/4, auth/2]).
+-export([init/0, handle/5, auth/2]).
 
 -include("http.hrl").
 -include("amf.hrl").
 
 %% @doc Initializes the module.
-%% @spec init() -> ok | {error, Reason}
+%% @spec init() -> {ok, State} | {error, Reason}
 init() ->
     case application:start(amf) of
 	ok ->
-	    ok;
+	    {ok, undefined};
 	{error, {already_started, amf}} ->
-	    ok;
+	    {ok, undefined};
 	_Else ->
 	    {error, amf_not_found}
     end.
@@ -25,13 +25,15 @@ init() ->
 %% @doc Handles the Request, Response and Flags from previous modules.
 %%      Uses `flex_services', `flex_auth' and `flex_destinations'
 %%      environment variables.
-%% @spec handle(Socket, Request, Response, Flags) -> Result
+%% @spec handle(Socket, Request, Response, Flags) -> {Result, NewState}
 %%       Request = #http_request{}
 %%       Response = #http_response{} | undefined
 %%       Flags = list()
 %%       Result = #http_response{} | already_sent | {error, Reason} | Proceed
+%%       NewState = any()
 %%       Proceed = {proceed, Request, Response, Flags}
-handle(_Socket, #http_request{method = 'POST'} = Request, Response, Flags) ->
+handle(_Socket, #http_request{method = 'POST'} = Request, Response,
+       Flags, State) ->
     case proplists:get_value('Content-Type', Request#http_request.headers) of
 	"application/x-amf" ->
 	    AMFRequest = amf:decode_packet(Request#http_request.body),
@@ -40,12 +42,12 @@ handle(_Socket, #http_request{method = 'POST'} = Request, Response, Flags) ->
 	    Headers = [{'Content-Type', "application/x-amf"},
 		       {'Content-Length', size(Body)}],
 	    Response1 = #http_response{headers = Headers, body = Body},
-	    {proceed, Request, Response1, Flags};
+	    {{proceed, Request, Response1, Flags}, State};
 	_ ->
-	    {proceed, Request, Response, Flags}
+	    {{proceed, Request, Response, Flags}, State}
     end;
-handle(_Socket, Request, Response, Flags) ->
-    {proceed, Request, Response, Flags}.
+handle(_Socket, Request, Response, Flags, State) ->
+    {{proceed, Request, Response, Flags}, State}.
 
 auth(Username, Password) ->
     error_logger:info_report({?MODULE, auth, Username, Password}),

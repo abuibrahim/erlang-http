@@ -5,27 +5,28 @@
 -module(http_mod_cache).
 -author('ruslan@babayev.com').
 
--export([init/0, handle/4]).
+-export([init/0, handle/5]).
 
 -include("http.hrl").
 -include_lib("kernel/include/file.hrl").
 
 %% @doc Initializes the module.
-%% @spec init() -> ok | {error, Reason}
+%% @spec init() -> {ok, State} | {error, Reason}
 init() ->
     ets:new(http_cache, [set, public, named_table]),
-    ok.
+    {ok, undefined}.
 
 %% @doc Handles the Request, Response and Flags from previous modules.
 %%      Uses `path' and `file_info' flags as well as `max_size_cached_file',
 %%      `max_cache_size' and `max_cache_memory' environment variables.
-%% @spec handle(Socket, Request, Response, Flags) -> Result
+%% @spec handle(Socket, Request, Response, Flags, State) -> {Result, NewState}
 %%       Request = #http_request{}
 %%       Response = #http_response{} | undefined
 %%       Flags = list()
 %%       Result = #http_response{} | already_sent | {error, Reason} | Proceed
 %%       Proceed = {proceed, Request, Response, Flags}
-handle(_Socket, #http_request{method = 'GET'} = Request, undefined, Flags) ->
+handle(_Socket, #http_request{method = 'GET'} = Request, undefined,
+       Flags, State) ->
     {ok, MaxSize} = application:get_env(max_size_cached_file),
     case proplists:get_value(file_info, Flags) of
 	FI when FI#file_info.type == regular, FI#file_info.size < MaxSize ->
@@ -35,7 +36,7 @@ handle(_Socket, #http_request{method = 'GET'} = Request, undefined, Flags) ->
 		    %% a fresh cache entry found
 		    H = headers(FI, Path),
 		    Response = #http_response{headers = H, body = Bin},
-		    {proceed, Request, Response, Flags};
+		    {{proceed, Request, Response, Flags}, State};
 		_ ->
 		    %% cache entry is either missing or stale
 		    case file:read_file(Path) of
@@ -44,16 +45,16 @@ handle(_Socket, #http_request{method = 'GET'} = Request, undefined, Flags) ->
 			    insert(http_cache, Entry),
 			    H = headers(FI, Path),
 			    Response = #http_response{headers = H, body = Bin},
-			    {proceed, Request, Response, Flags};
+			    {{proceed, Request, Response, Flags}, State};
 			{error, _Reason} ->
-			    http_lib:response(404)
+			    {http_lib:response(404), State}
 		    end
 	    end;
 	_ ->
-	    {proceed, Request, undefined, Flags}
+	    {{proceed, Request, undefined, Flags}, State}
     end;
-handle(_Socket, Request, Response, Flags) ->
-    {proceed, Request, Response, Flags}.
+handle(_Socket, Request, Response, Flags, State) ->
+    {{proceed, Request, Response, Flags}, State}.
 
 headers(#file_info{mtime = Time, size = Size} = FileInfo, Path) ->
     Headers1 =

@@ -7,31 +7,33 @@
 -module(http_mod_continue).
 -author('ruslan@babayev.com').
 
--export([init/0, handle/4]).
+-export([init/0, handle/5]).
 
 -include("http.hrl").
 
 %% @doc Initializes the module.
-%% @spec init() -> ok | {error, Reason}
+%% @spec init() -> {ok, State} | {error, Reason}
 init() ->
-    ok.
+    {ok, undefined}.
 
 %% @doc Handles the Request, Response and Flags from previous modules.
-%% @spec handle(Socket, Request, Response, Flags) -> Result
+%% @todo Returns "Not Implemented" (501).
+%% @spec handle(Socket, Request, Response, Flags, State) -> {Result, NewState}
 %%       Request = #http_request{}
 %%       Response = #http_response{} | undefined
 %%       Flags = list()
 %%       Result = #http_response{} | already_sent | {error, Reason} | Proceed
+%%       NewState = any()
 %%       Proceed = {proceed, Request, Response, Flags}
-handle(Socket, #http_request{method = M} = Request, Response, Flags)
+handle(Socket, #http_request{method = M} = Request, Response, Flags, State)
   when M == 'POST'; M == 'PUT'; M == 'PROPFIND'; M == 'OPTIONS' ->
     case proplists:get_value("Expect", Request#http_request.headers) of
 	"100-continue" ->
 	    Continue = <<"HTTP/1.1 100 Continue\r\n\r\n">>,
 	    http_lib:send(Socket, Continue),
-	    {proceed, Request, Response, Flags};
+	    {{proceed, Request, Response, Flags}, State};
 	_ ->
-	    {proceed, Request, Response, Flags}
+	    {{proceed, Request, Response, Flags}, State}
     end;
-handle(_Socket, Request, Response, Flags) ->
-    {proceed, Request, Response, Flags}.
+handle(_Socket, Request, Response, Flags, State) ->
+    {{proceed, Request, Response, Flags}, State}.

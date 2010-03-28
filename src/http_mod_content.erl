@@ -6,23 +6,25 @@
 -module(http_mod_content).
 -author('ruslan@babayev.com').
 
--export([init/0, handle/4]).
+-export([init/0, handle/5]).
 
 -include("http.hrl").
 
 %% @doc Initializes the module.
-%% @spec init() -> ok | {error, Reason}
+%% @spec init() -> {ok, State} | {error, Reason}
 init() ->
-    ok.
+    {ok, undefined}.
 
 %% @doc Handles the Request, Response and Flags from previous modules.
-%% @spec handle(Socket, Request, Response, Flags) -> Result
+%% @todo Returns "Not Implemented" (501).
+%% @spec handle(Socket, Request, Response, Flags, State) -> {Result, NewState}
 %%       Request = #http_request{}
 %%       Response = #http_response{} | undefined
 %%       Flags = list()
 %%       Result = #http_response{} | already_sent | {error, Reason} | Proceed
+%%       NewState = any()
 %%       Proceed = {proceed, Request, Response, Flags}
-handle(Socket, #http_request{method = M} = Request, Response, Flags)
+handle(Socket, #http_request{method = M} = Request, Response, Flags, State)
   when M == 'POST'; M == 'PUT'; M == 'PROPFIND'; M == 'OPTIONS' ->
     Headers = Request#http_request.headers,
     case proplists:get_value('Content-Length', Headers) of
@@ -34,10 +36,10 @@ handle(Socket, #http_request{method = M} = Request, Response, Flags)
 	    case http_lib:recv(Socket, list_to_integer(Length), Timeout) of
 		{ok, Body} ->
 		    Request1 = Request#http_request{body = Body},
-		    {proceed, Request1, Response, Flags};
+		    {{proceed, Request1, Response, Flags}, State};
 		{error, Reason} ->
-		    {error, Reason}
+		    {{error, Reason}, State}
 	    end
     end;
-handle(_Socket, Request, Response, Flags) ->
-    {proceed, Request, Response, Flags}.
+handle(_Socket, Request, Response, Flags, State) ->
+    {{proceed, Request, Response, Flags}, State}.

@@ -5,14 +5,14 @@
 -module(http_mod_esi).
 -author('ruslan@babayev.com').
 
--export([init/0, handle/4]).
+-export([init/0, handle/5]).
 
 -include("http.hrl").
 
 %% @doc Initializes the module.
-%% @spec init() -> ok | {error, Reason}
+%% @spec init() -> {ok, State} | {error, Reason}
 init() ->
-    ok.
+    {ok, undefined}.
 
 %% @doc Handles the Request, Response and Flags from previous modules.
 %%      Uses `scripts' environment variable.
@@ -21,23 +21,26 @@ init() ->
 %%       Response = #http_response{} | undefined
 %%       Flags = list()
 %%       Result = #http_response{} | already_sent | {error, Reason} | Proceed
+%%       NewState = any()
 %%       Proceed = {proceed, Request, Response, Flags}
-handle(Socket, Request, undefined, Flags) ->
+handle(Socket, Request, undefined, Flags, State) ->
     Path = http_lib:uri_to_path(Request#http_request.uri),
     {ok, Scripts} = application:get_env(scripts),
     case match(Request, Path, Scripts) of
 	{match, {Module, Function, Params}} ->
-	    try Module:Function(Socket, Request, Params)
+	    try Module:Function(Socket, Request, Params) of
+		Result ->
+		    {Result, State}
 	    catch
-		exit:Reason -> {error, Reason}
+		exit:Reason -> {{error, Reason}, State}
 	    end;
 	nomatch ->
-	    {proceed, Request, undefined, Flags};
+	    {{proceed, Request, undefined, Flags}, State};
 	{error, Reason} ->
-	    {error, Reason}
+	    {{error, Reason}, State}
     end;
-handle(_Socket, Request, Response, Flags) ->
-    {proceed, Request, Response, Flags}.
+handle(_Socket, Request, Response, Flags, State) ->
+    {{proceed, Request, Response, Flags}, State}.
 
 match(_Request, _Path, []) ->
     nomatch;

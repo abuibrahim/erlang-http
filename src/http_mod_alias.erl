@@ -5,26 +5,26 @@
 -module(http_mod_alias).
 -author('ruslan@babayev.com').
 
--export([init/0, handle/4]).
+-export([init/0, handle/5]).
 
 -include("http.hrl").
 -include_lib("kernel/include/file.hrl").
 
 %% @doc Initializes the module.
-%% @spec init() -> ok | {error, Reason}
+%% @spec init() -> {ok, State} | {error, Reason}
 init() ->
-    ok.
+    {ok, undefined}.
 
 %% @doc Handles the Request, Response and Flags from previous modules.
-%%      Uses `aliases', `docroot' and `indices' environment variables.
-%%      Sets `path' flag.
-%% @spec handle(Socket, Request, Response, Flags) -> Result
+%% @todo Returns "Not Implemented" (501).
+%% @spec handle(Socket, Request, Response, Flags, State) -> {Result, NewState}
 %%       Request = #http_request{}
 %%       Response = #http_response{} | undefined
 %%       Flags = list()
 %%       Result = #http_response{} | already_sent | {error, Reason} | Proceed
+%%       NewState = any()
 %%       Proceed = {proceed, Request, Response, Flags}
-handle(_Socket, Request, Response, Flags) ->
+handle(_Socket, Request, Response, Flags, State) ->
     ReqPath = http_lib:uri_to_path(Request#http_request.uri),
     DecodedPath = http_lib:url_decode(ReqPath),
     {ok, Aliases} = application:get_env(aliases),
@@ -33,7 +33,7 @@ handle(_Socket, Request, Response, Flags) ->
     {ok, Indices} = application:get_env(indices),
     Path2 = maybe_append_index(Path1, Indices),
     [Path3|_] = string:tokens(Path2, "?"),
-    {proceed, Request, Response, [{path,Path3}|Flags]}.
+    {{proceed, Request, Response, [{path,Path3}|Flags]}, State}.
 
 abs_path(ReqPath, [], DocRoot) ->
     DocRoot ++ ReqPath;

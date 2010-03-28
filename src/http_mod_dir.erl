@@ -5,25 +5,26 @@
 -module(http_mod_dir).
 -author('ruslan@babayev.com').
 
--export([init/0, handle/4]).
+-export([init/0, handle/5]).
 
 -include("http.hrl").
 -include_lib("kernel/include/file.hrl").
 
 %% @doc Initializes the module.
-%% @spec init() -> ok | {error, Reason}
+%% @spec init() -> {ok, State} | {error, Reason}
 init() ->
-    ok.
+    {ok, undefined}.
 
 %% @doc Handles the Request, Response and Flags from previous modules.
 %%      Uses `path' and `file_info' flags.
-%% @spec handle(Socket, Request, Response, Flags) -> Result
+%% @spec handle(Socket, Request, Response, Flags, State) -> {Result, NewState}
 %%       Request = #http_request{}
 %%       Response = #http_response{} | undefined
 %%       Flags = list()
 %%       Result = #http_response{} | already_sent | {error, Reason} | Proceed
 %%       Proceed = {proceed, Request, Response, Flags}
-handle(_Socket, #http_request{method = 'GET'} = Request, undefined, Flags) ->
+handle(_Socket, #http_request{method = 'GET'} = Request, undefined,
+       Flags, State) ->
     Path = proplists:get_value(path, Flags),
     case proplists:get_value(file_info, Flags) of
 	FileInfo when FileInfo#file_info.type == directory ->
@@ -34,15 +35,15 @@ handle(_Socket, #http_request{method = 'GET'} = Request, undefined, Flags) ->
 		    Headers = [{'Content-Type', "text/html"},
 			       {'Content-Length', iolist_size(Dir)}],
 		    Response = #http_response{headers = Headers, body = Dir},
-		    {proceed, Request, Response, Flags};
+		    {{proceed, Request, Response, Flags}, State};
 		{error, _Reason} ->
-		    http_lib:response(404)
+		    {http_lib:response(404), State}
 	    end;
 	_ ->
-	    {proceed, Request, undefined, Flags}
+	    {{proceed, Request, undefined, Flags}, State}
     end;
-handle(_Socket, Request, Response, Flags) ->
-    {proceed, Request, Response, Flags}.
+handle(_Socket, Request, Response, Flags, State) ->
+    {{proceed, Request, Response, Flags}, State}.
 
 list_dir(AbsPath, ReqPath) ->
     case file:list_dir(AbsPath) of

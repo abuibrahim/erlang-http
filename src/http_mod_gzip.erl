@@ -5,24 +5,27 @@
 -module(http_mod_gzip).
 -author('ruslan@babayev.com').
 
--export([init/0, handle/4]).
+-export([init/0, handle/5]).
 
 -include("http.hrl").
 
 %% @doc Initializes the module.
-%% @spec init() -> ok | {error, Reason}
+%% @spec init() -> {ok, State} | {error, Reason}
 init() ->
-    ok.
+    {ok, undefined}.
 
 %% @doc Handles the Request, Response and Flags from previous modules.
 %%      Uses `path' flag.
-%% @spec handle(Socket, Request, Response, Flags) -> Result
+%% @spec handle(Socket, Request, Response, Flags, State) -> {Result, NewState}
 %%       Request = #http_request{}
 %%       Response = #http_response{} | undefined
 %%       Flags = list()
 %%       Result = #http_response{} | already_sent | {error, Reason} | Proceed
 %%       Proceed = {proceed, Request, Response, Flags}
-handle(_Socket, #http_request{method = 'GET'} = Request, Response, Flags) ->
+handle(_Socket, Request, undefined, Flags, State) ->
+    {{proceed, Request, undefined, Flags}, State};
+handle(_Socket, #http_request{method = 'GET'} = Request, Response,
+       Flags, State) ->
     Headers = Request#http_request.headers,
     Path = proplists:get_value(path, Flags),
     case accepts_gzip(Headers) andalso http_lib:is_compressible(Path) of
@@ -30,18 +33,16 @@ handle(_Socket, #http_request{method = 'GET'} = Request, Response, Flags) ->
 	    ResponseHeaders = Response#http_response.headers,
 	    case proplists:is_defined('Content-Encoding', ResponseHeaders) of
 		false ->
-		    {proceed, Request, vary(gzip(Response)), Flags};
+		    {{proceed, Request, vary(gzip(Response)), Flags}, State};
 		true ->
-		    {proceed, Request, vary(Response), Flags}
+		    {{proceed, Request, vary(Response), Flags}, State}
 	    end;
 	false ->
-	    {proceed, Request, vary(Response), Flags}
+	    {{proceed, Request, vary(Response), Flags}, State}
     end;
-handle(_Socket, Request, undefined, Flags) ->
-    {proceed, Request, undefined, Flags};
-handle(_Socket, Request, Response, Flags)
+handle(_Socket, Request, Response, Flags, State)
   when is_record(Response, http_response) ->
-    {proceed, Request, vary(Response), Flags}.
+    {{proceed, Request, vary(Response), Flags}, State}.
 
 accepts_gzip(Headers) ->
     case proplists:get_value('Accept-Encoding', Headers) of

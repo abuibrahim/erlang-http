@@ -12,7 +12,6 @@
 start() ->
     application:start(crypto),
     application:start(ssl),
-    application:start(amf),
     application:start(http).
 
 %% @doc Stops the application.

@@ -5,7 +5,7 @@
 -module(http_mod_auth).
 -author('ruslan@babayev.com').
 
--export([init/0, handle/4]).
+-export([init/0, handle/5]).
 
 -include("http.hrl").
 
@@ -13,19 +13,20 @@
 -record(http_group, {name, users}).
 
 %% @doc Initializes the module.
-%% @spec init() -> ok | {error, Reason}
+%% @spec init() -> {ok, State} | {error, Reason}
 init() ->
-    ok.
+    {ok, undefined}.
 
 %% @doc Handles the Request, Response and Flags from previous modules.
-%%      Uses `path' flag and `directories' environment variable.
-%% @spec handle(Socket, Request, Response, Flags) -> Result
+%% @todo Returns "Not Implemented" (501).
+%% @spec handle(Socket, Request, Response, Flags, State) -> {Result, NewState}
 %%       Request = #http_request{}
 %%       Response = #http_response{} | undefined
 %%       Flags = list()
 %%       Result = #http_response{} | already_sent | {error, Reason} | Proceed
+%%       NewState = any()
 %%       Proceed = {proceed, Request, Response, Flags}
-handle(Socket, Request, Response, Flags) ->
+handle(Socket, Request, Response, Flags, State) ->
     Path = proplists:get_value(path, Flags),
     {ok, Directories} = application:get_env(directories),
     SortedUniqueDirectories = lists:ukeysort(1, Directories),
@@ -37,15 +38,15 @@ handle(Socket, Request, Response, Flags) ->
 		    Deny = proplists:get_value(deny, DirOpts, none),
 		    case is_allowed(Address, Allow, Deny) of
 			true ->
-			    auth(Request, Response, DirOpts, Flags);
+			    {auth(Request, Response, DirOpts, Flags), State};
 			false ->
-			    http_lib:response(403)
+			    {http_lib:response(403), State}
 		    end;
 		{error, _Reason} ->
-		    http_lib:response(403)
+		    {http_lib:response(403), State}
 	    end;
 	nomatch ->
-	    {proceed, Request, Response, Flags}
+	    {{proceed, Request, Response, Flags}, State}
     end.
 
 path_match(Path, Directories) ->
